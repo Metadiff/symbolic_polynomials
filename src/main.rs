@@ -8,15 +8,17 @@ fn main(){
     let asqb = &b * &(&a * &a);
     let composite = &ab2 * &asqb;
     println!("{}", composite);
-    println!("{:?}", composite);
-    let c = &asqb + &composite;
-    println!("c={}", c);
-    println!("{:?}", c);
-    let csq = &c * &c;
-    println!("c^2={}", csq);
-    println!("{:?}", csq);
     let mut div = (&composite / &ab2).unwrap();
     println!("{}", div);
     div = (&div / &asqb).unwrap();
     println!("{}", div);
+    let c = &asqb + &composite;
+    println!("c={}", c);
+    println!("c+c={}", &c + &c);
+    let csq = &c * &c;
+    println!("c^2={}", csq);
+    let mut div2 = (&c / &asqb).unwrap();
+    println!("{}", div2);
+    div2 = (&csq / &(&c * &c)).unwrap();
+    println!("{}", div2);
 }
