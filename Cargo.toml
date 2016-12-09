@@ -1,14 +1,14 @@
 [package]
 name = "symints"
-version = "0.0.1"
-authors = ["Alexander Botev <botevmg@gmail.com>"]
-description = "A package for manipulation of symbolic integers"
+version = "0.1.0"
+authors = ["Aleksandzr Botev <botevmg@gmail.com>"]
+description = "A package for manipulation of polynomials over the integers."
 documentation = "http://botev.github.io/symbolic_polynomials/index.html"
 homepage = "https://github.com/Botev/symbolic_polynomials"
 repository = "https://github.com/Botev/symbolic_polynomials"
 readme = "README.md"
-keywords = ["math","symbolic","integers"]
-license = "GPL-3.0+"
+keywords = ["math", "symbolic", "integers"]
+license = "Apache 2.0"
 
 [lib]
 name = "symints"

@@ -1,0 +1,15 @@
+language: rust
+rust:
+  - 1.10.0
+  - 1.11.0
+  - 1.12.0
+  - 1.13.0
+  - nightly
+
+after_success:
+        - chmod 775 deploy-ghpages.sh
+        - ./deploy-ghpages.sh
+
+env:
+ global:
+ - GH_REF: github.com/Botev/symbolic_polynomials.git
