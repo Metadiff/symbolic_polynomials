@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Aleksandzr Botev <botevmg@gmail.com>"]
 description = "A package for manipulation of polynomials over the integers."
 documentation = "http://botev.github.io/symbolic_polynomials/index.html"
-homepage = "https://github.com/Botev/symbolic_polynomials"
-repository = "https://github.com/Botev/symbolic_polynomials"
+homepage = "https://github.com/Metadiff/symints"
+repository = "https://github.com/Metadiff/symints"
 readme = "README.md"
 keywords = ["math", "symbolic", "integers"]
 license = "Apache 2.0"
@@ -13,7 +13,7 @@ license = "Apache 2.0"
 [lib]
 name = "symints"
 path = "src/lib.rs"
-doctest = true
+doctest = false
 
 [[bin]]
 name = "main"
