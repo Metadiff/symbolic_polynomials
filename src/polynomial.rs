@@ -6,6 +6,7 @@ use std::convert::From;
 use traits::*;
 use monomial::Monomial;
 
+/// A symbolic polynomial over the integers.
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
 pub struct Polynomial {
@@ -21,12 +22,6 @@ impl IsConstant for Polynomial{
         }
     }
 }
-
-//impl From<Monomial> for Polynomial{
-//    fn from(m: Monomial) -> Self{
-//        Polynomial{monomials: vec![m]}
-//    }
-//}
 
 impl fmt::Display for Polynomial {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
@@ -77,6 +72,18 @@ impl<'a> From<&'a Monomial> for Polynomial{
         Polynomial{monomials: vec![m.clone()]}
     }
 }
+
+impl From<Monomial> for Polynomial{
+    fn from(m: Monomial) -> Self{
+        Polynomial{monomials: vec![m]}
+    }
+}
+
+//impl From<Monomial> for Polynomial{
+//    fn from(m: Monomial) -> Self{
+//        Polynomial{monomials: vec![m]}
+//    }
+//}
 
 impl PartialEq for Polynomial{
     fn eq(&self, other: &Polynomial) -> bool {

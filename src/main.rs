@@ -1,8 +1,9 @@
 extern crate symints;
 
+use symints::Registry;
 type SymInt = symints::Polynomial;
 fn main(){
-    let mut registry = symints::Registry{id: 0};
+    let mut registry = Registry::default();
     let a = registry.new_monomial_variable();
     let b = registry.new_monomial_variable();
     let ab2 =  &(2 * &a) * &b;

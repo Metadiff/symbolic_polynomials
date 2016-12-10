@@ -1,15 +1,13 @@
 extern crate symints;
-
-#[allow(unused_imports)]
 use symints::*;
 
 #[test]
 pub fn constructor() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_variable();
     let b = Polynomial::from(&(5 * &registry.specific_monomial_variable(1)));
-    let minus_six = symints::Polynomial::from(-6);
-    let thirteen = symints::Polynomial::from(13);
+    let minus_six = Polynomial::from(-6);
+    let thirteen = Polynomial::from(13);
 
     assert!(minus_six.is_constant());
     assert!(minus_six.monomials.len() == 1);
@@ -34,7 +32,7 @@ pub fn constructor() {
 
 #[test]
 pub fn partial_eq_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_variable();
     let b = registry.new_variable();
     let a_v2 = registry.specific_variable(0);
@@ -66,7 +64,7 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_variable();
     let b = registry.new_variable();
     // a^2
@@ -111,7 +109,7 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_monomial_variable();
     let b = registry.new_monomial_variable();
     // ab + a^2 + 1
@@ -140,7 +138,7 @@ pub fn mul_test() {
 
 #[test]
 pub fn div_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_monomial_variable();
     let b = registry.new_monomial_variable();
     // ab + a^2 + 1
@@ -161,7 +159,7 @@ pub fn div_test() {
 
 #[test]
 pub fn add_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a_mon = registry.specific_monomial_variable(0);
     let a = registry.new_variable();
     let b = registry.new_variable();
@@ -191,7 +189,7 @@ pub fn add_test() {
 
 #[test]
 pub fn sub_test() {
-    let mut registry = symints::Registry::default();
+    let mut registry = Registry::default();
     let a = registry.new_variable();
     let b = registry.new_variable();
     // a + b + 1

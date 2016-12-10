@@ -7,6 +7,7 @@ use std::iter;
 use traits::*;
 use polynomial::Polynomial;
 
+/// A symbolic monomial over the integers.
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
 pub struct Monomial {
@@ -15,6 +16,18 @@ pub struct Monomial {
 }
 
 impl Monomial{
+    /// Returns `true` if the two monomials differ only by a constant factor.
+    ///
+    /// # Examples
+    /// ```
+    /// # use symints::*;
+    /// let mut registry = symints::Registry::default();
+    /// let a = registry.new_monomial_variable();
+    /// let b = registry.new_monomial_variable();
+    /// let a_times_2 = 2 * &a;
+    /// assert!(a.up_to_coefficient(&a_times_2));
+    /// assert!(!a.up_to_coefficient(&b));
+    /// ```
     pub fn up_to_coefficient(&self, other: &Monomial) -> bool {
         match self.powers.len() == other.powers.len() {
             true => {
