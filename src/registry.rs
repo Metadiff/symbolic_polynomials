@@ -45,12 +45,30 @@ impl Registry {
         self.id = 0;
     }
 
-    pub fn eval_monomial(&self, monomial: &Monomial) -> i64 {
-        0
+    pub fn eval_monomial(&self, monomial: &Monomial, values: &HashMap<u16, i64>) -> Option<i64> {
+        let mut value = monomial.coefficient;
+        for &(id, pow) in monomial.powers.iter(){
+            match values.get(&id) {
+                Some(v) => {
+                    value *= v.pow(pow as u32);
+                },
+                None => return None
+            }
+        }
+        Some(value)
     }
 
-    pub fn eval(&self, polynomial: &Polynomial) -> i64 {
-        polynomial.monomials.iter().fold(0, |sum, val| sum + self.eval_monomial(val))
+    pub fn eval(&self, polynomial: &Polynomial, values: &HashMap<u16, i64>) -> Option<i64> {
+        let mut value = 0;
+        for m in polynomial.monomials.iter(){
+            match self.eval_monomial(m, values) {
+                Some(v) => {
+                    value += v;
+                },
+                None => return None
+            }
+        }
+        Some(value)
     }
 }
 
@@ -111,8 +129,8 @@ impl<'a, 'b> Floor<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn floor(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left);
-            let v2 = self.eval(right);
+            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.floor(v1, v2))
         } else {
             self.floor_registry.insert(self.id, (left.clone(), right.clone()));
@@ -125,8 +143,8 @@ impl Floor<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn floor(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left);
-            let v2 = self.eval(&right);
+            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.floor(v1, v2))
         } else {
             self.floor_registry.insert(self.id, (left, right));
@@ -148,8 +166,8 @@ impl<'a, 'b> Ceil<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn ceil(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left);
-            let v2 = self.eval(right);
+            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.ceil(v1, v2))
         } else {
             self.ceil_registry.insert(self.id, (left.clone(), right.clone()));
@@ -162,8 +180,8 @@ impl Ceil<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn ceil(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left);
-            let v2 = self.eval(&right);
+            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.ceil(v1, v2))
         } else {
             self.ceil_registry.insert(self.id, (left, right));
@@ -191,8 +209,8 @@ impl<'a, 'b> Min<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn min(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left);
-            let v2 = self.eval(right);
+            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.min(v1, v2))
         } else {
             self.min_registry.insert(self.id, (left.clone(), right.clone()));
@@ -205,8 +223,8 @@ impl Min<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn min(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left);
-            let v2 = self.eval(&right);
+            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.min(v1, v2))
         } else {
             self.min_registry.insert(self.id, (left, right));
@@ -234,8 +252,8 @@ impl<'a, 'b> Max<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn max(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left);
-            let v2 = self.eval(right);
+            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.max(v1, v2))
         } else {
             self.max_registry.insert(self.id, (left.clone(), right.clone()));
@@ -248,8 +266,8 @@ impl Max<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn max(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
         if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left);
-            let v2 = self.eval(&right);
+            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
+            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
             Polynomial::from(self.max(v1, v2))
         } else {
             self.max_registry.insert(self.id, (left, right));
