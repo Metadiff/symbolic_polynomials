@@ -253,16 +253,62 @@ pub fn sub_test() {
 }
 
 #[test]
-pub fn floor_ceil_test() {
-    // TODO
-}
-
-#[test]
-pub fn min_max_test() {
-    // TODO
-}
-
-#[test]
 pub fn eval_test() {
     // TODO
+}
+
+#[test]
+pub fn floor_test() {
+    let mut registry = symints::Registry::default();
+    let a = registry.new_monomial_variable();
+    let b = registry.new_monomial_variable();
+    let a_square = &a * &a;
+    let a_v2 = registry.floor(&a_square, &a);
+    let a_square_floor_b = registry.floor(&a_square, &b);
+
+    assert!(a_v2 == a);
+    assert!(a_square_floor_b.monomials.len() == 1);
+    assert!(a_square_floor_b.monomials[0].coefficient == 1);
+    assert!(a_square_floor_b.monomials[0].powers == vec![(2, 1)]);
+}
+
+#[test]
+pub fn ceil_test() {
+    let mut registry = symints::Registry::default();
+    let a = registry.new_monomial_variable();
+    let b = registry.new_monomial_variable();
+    let a_square = &a * &a;
+    let a_v2 = registry.ceil(&a_square, &a);
+    let a_square_ceil_b = registry.ceil(&a_square, &b);
+
+    assert!(a_v2 == a);
+    assert!(a_square_ceil_b.monomials.len() == 1);
+    assert!(a_square_ceil_b.monomials[0].coefficient == 1);
+    assert!(a_square_ceil_b.monomials[0].powers == vec![(2, 1)]);
+}
+
+#[test]
+pub fn min_test() {
+    let mut registry = symints::Registry::default();
+    let a = registry.new_monomial_variable();
+    let b = registry.new_monomial_variable();
+    let a_square = &a * &a;
+    let a_square_min_b = registry.min(&a_square, &b);
+
+    assert!(a_square_min_b.monomials.len() == 1);
+    assert!(a_square_min_b.monomials[0].coefficient == 1);
+    assert!(a_square_min_b.monomials[0].powers == vec![(2, 1)]);
+}
+
+#[test]
+pub fn max_test() {
+    let mut registry = symints::Registry::default();
+    let a = registry.new_monomial_variable();
+    let b = registry.new_monomial_variable();
+    let a_square = &a * &a;
+    let a_square_max_b = registry.max(&a_square, &b);
+
+    assert!(a_square_max_b.monomials.len() == 1);
+    assert!(a_square_max_b.monomials[0].coefficient == 1);
+    assert!(a_square_max_b.monomials[0].powers == vec![(2, 1)]);
 }

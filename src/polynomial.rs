@@ -110,6 +110,16 @@ impl<C> PartialEq<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
+impl PartialEq<Monomial> for Polynomial {
+    fn eq(&self, other: &Monomial) -> bool {
+        match self.monomials.len(){
+            0 => other.coefficient == 0,
+            1 => self.monomials[0].eq(other),
+            _ => false
+        }
+    }
+}
+
 impl PartialOrd for Polynomial {
     fn partial_cmp(&self, other: &Polynomial) -> Option<Ordering> {
         Some(self.cmp(other))

@@ -45,19 +45,78 @@ impl Registry {
         self.id = 0;
     }
 
+    /// Evaluates the `monomial` given the `values` provided. Each entry in `values`
+    /// should represent the assignment of the symbolic variable with that `id`.
+    ///
+    /// If there are symbolic variables which are needed, but not provided returns None.
     pub fn eval_monomial(&self, monomial: &Monomial, values: &HashMap<u16, i64>) -> Option<i64> {
         let mut value = monomial.coefficient;
         for &(id, pow) in monomial.powers.iter(){
-            match values.get(&id) {
-                Some(v) => {
-                    value *= v.pow(pow as u32);
-                },
-                None => return None
-            }
+            let id_value: i64 = match values.get(&id) {
+                Some(&v) => v,
+                None => match self.floor_registry.get(&id) {
+                    Some(&(ref p1, ref p2)) => {
+                        let v1 = match self.eval(p1, values) {
+                            Some(v) => v,
+                            None => return None
+                        };
+                        let v2 = match self.eval(p2, values) {
+                            Some(v) => v,
+                            None => return None
+                        };
+                        ((v1 as f64) / (v2 as f64)).floor() as i64
+                    }
+                    None => match self.ceil_registry.get(&id) {
+                        Some(&(ref p1, ref p2)) => {
+                            let v1 = match self.eval(p1, values) {
+                                Some(v) => v,
+                                None => return None
+                            };
+                            let v2 = match self.eval(p2, values) {
+                                Some(v) => v,
+                                None => return None
+                            };
+                            ((v1 as f64) / (v2 as f64)).ceil() as i64
+                        },
+                        None => match self.min_registry.get(&id) {
+                            Some(&(ref p1, ref p2)) => {
+                                let v1 = match self.eval(p1, values) {
+                                    Some(v) => v,
+                                    None => return None
+                                };
+                                let v2 = match self.eval(p2, values) {
+                                    Some(v) => v,
+                                    None => return None
+                                };
+                                if v1 < v2 {v1} else {v2}
+                            },
+                            None => match self.max_registry.get(&id) {
+                                Some(&(ref p1, ref p2)) => {
+                                    let v1 = match self.eval(p1, values) {
+                                        Some(v) => v,
+                                        None => return None
+                                    };
+                                    let v2 = match self.eval(p2, values) {
+                                        Some(v) => v,
+                                        None => return None
+                                    };
+                                    if v1 > v2 {v1} else {v2}
+                                },
+                                None => return None
+                            }
+                        }
+                    }
+                }
+            };
+            value *= id_value.pow(pow as u32);
         }
         Some(value)
     }
 
+    /// Evaluates the `polynomial` given the `values` provided. Each entry in `values`
+    /// should represent the assignment of the symbolic variable with that `id`.
+    ///
+    /// If there are symbolic variables which are needed, but not provided returns None.
     pub fn eval(&self, polynomial: &Polynomial, values: &HashMap<u16, i64>) -> Option<i64> {
         let mut value = 0;
         for m in polynomial.monomials.iter(){
@@ -128,13 +187,12 @@ impl<C, D> Floor<C, D> for Registry where C: Clone + Into<i64>, D: Clone + Into<
 impl<'a, 'b> Floor<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn floor(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
-        if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            Polynomial::from(self.floor(v1, v2))
-        } else {
-            self.floor_registry.insert(self.id, (left.clone(), right.clone()));
-            self.new_variable()
+        match left.checked_div(right) {
+            Some(p) => p,
+            None => {
+                self.floor_registry.insert(self.id, (left.clone(), right.clone()));
+                self.new_variable()
+            }
         }
     }
 }
@@ -142,13 +200,12 @@ impl<'a, 'b> Floor<&'a Polynomial, &'b Polynomial> for Registry {
 impl Floor<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn floor(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
-        if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            Polynomial::from(self.floor(v1, v2))
-        } else {
-            self.floor_registry.insert(self.id, (left, right));
-            self.new_variable()
+        match left.checked_div(&right) {
+            Some(p) => p,
+            None => {
+                self.floor_registry.insert(self.id, (left, right));
+                self.new_variable()
+            }
         }
     }
 }
@@ -165,13 +222,12 @@ impl<C, D> Ceil<C, D> for Registry where C: Clone + Into<i64>, D: Clone + Into<i
 impl<'a, 'b> Ceil<&'a Polynomial, &'b Polynomial> for Registry {
     type Output = Polynomial;
     fn ceil(&mut self, left: &'a Polynomial, right: &'b Polynomial) -> Self::Output {
-        if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            let v2 = self.eval(right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            Polynomial::from(self.ceil(v1, v2))
-        } else {
-            self.ceil_registry.insert(self.id, (left.clone(), right.clone()));
-            self.new_variable()
+        match left.checked_div(right) {
+            Some(p) => p,
+            None => {
+                self.ceil_registry.insert(self.id, (left.clone(), right.clone()));
+                self.new_variable()
+            }
         }
     }
 }
@@ -179,13 +235,12 @@ impl<'a, 'b> Ceil<&'a Polynomial, &'b Polynomial> for Registry {
 impl Ceil<Polynomial, Polynomial> for Registry {
     type Output = Polynomial;
     fn ceil(&mut self, left: Polynomial, right: Polynomial) -> Self::Output {
-        if left.is_constant() && right.is_constant() {
-            let v1 = self.eval(&left, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            let v2 = self.eval(&right, &HashMap::<u16, i64>::with_capacity(0)).unwrap();
-            Polynomial::from(self.ceil(v1, v2))
-        } else {
-            self.ceil_registry.insert(self.id, (left, right));
-            self.new_variable()
+        match left.checked_div(&right) {
+            Some(p) => p,
+            None => {
+                self.ceil_registry.insert(self.id, (left, right));
+                self.new_variable()
+            }
         }
     }
 }

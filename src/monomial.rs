@@ -136,6 +136,12 @@ impl<C> PartialEq<C> for Monomial where C: Clone + Into<i64> {
     }
 }
 
+impl PartialEq<Polynomial> for Monomial {
+    fn eq(&self, other: &Polynomial) -> bool {
+        other.eq(self)
+    }
+}
+
 impl PartialOrd for Monomial {
     fn partial_cmp(&self, other: &Monomial) -> Option<Ordering> {
         Some(self.cmp(other))
