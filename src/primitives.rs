@@ -4,9 +4,9 @@ use std::result::Result;
 use std::fmt;
 use std::rc::Rc;
 
-pub trait Id: Clone + Eq + Ord + Sized + Hash + VariableDisplay {}
+pub trait Id: Clone + Ord + Hash + VariableDisplay {}
 
-impl<T> Id for T where T: Clone + Eq + Ord + Sized + Hash + VariableDisplay {}
+impl<T> Id for T where T: Clone + Ord + Hash + VariableDisplay {}
 
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
