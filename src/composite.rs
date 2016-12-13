@@ -6,7 +6,7 @@ use primitives::*;
 impl fmt::Display for Composite {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
-            &Composite::Variable(id, _) => {
+            &Composite::Variable(id) => {
                 try!(write!(f, "{}", (id as u8 + ('a' as u8)) as char))
             },
             &Composite::Floor(ref x, ref y) => {
@@ -29,7 +29,7 @@ impl fmt::Display for Composite {
 impl fmt::Debug for Composite {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
-            &Composite::Variable(id, _) => {
+            &Composite::Variable(id) => {
                 try!(write!(f, "{}", (id as u8 + ('a' as u8)) as char))
             },
             &Composite::Floor(ref x, ref y) => {
@@ -58,15 +58,15 @@ impl PartialOrd for Composite {
 impl Ord for Composite {
     fn cmp(&self, other: &Composite) -> Ordering {
         match self {
-            &Composite::Variable(ref id, _) => {
+            &Composite::Variable(ref id) => {
                 match other {
-                    &Composite::Variable(ref o_id, _) => Ord::cmp(o_id, id),
+                    &Composite::Variable(ref o_id) => Ord::cmp(o_id, id),
                     _ => Ordering::Greater
                 }
             },
             &Composite::Max(ref x, ref y) => {
                 match other {
-                    &Composite::Variable(_, _) => Ordering::Less,
+                    &Composite::Variable(_) => Ordering::Less,
                     &Composite::Max(ref o_x, ref o_y) => {
                         match Ord::cmp(x, o_x) {
                             Ordering::Equal => Ord::cmp(y, o_y),
@@ -78,7 +78,7 @@ impl Ord for Composite {
             },
             &Composite::Min(ref x, ref y) => {
                 match other {
-                    &Composite::Variable(_, _) | &Composite::Max(_, _) => Ordering::Less,
+                    &Composite::Variable(_) | &Composite::Max(_, _) => Ordering::Less,
                     &Composite::Min(ref o_x, ref o_y) => {
                         match Ord::cmp(x, o_x) {
                             Ordering::Equal => Ord::cmp(y, o_y),
@@ -118,20 +118,8 @@ impl Ord for Composite {
 impl Evaluable for Composite {
     fn evaluate(&self, values: &HashMap<u16, i64>) -> Result<i64, u16> {
         match self {
-            &Composite::Variable(ref x, ref constraint) => {
-                match constraint {
-                    &Constraint::Unknown => values.get(x)
-                        .map(|&v| v)
-                        .ok_or(*x),
-                    &Constraint::Positive => match values.get(x).map(|&v| v) {
-                        Some(v) => if v > 0 { Ok(v) } else { Err(*x) },
-                        None => Err(*x)
-                    },
-                    &Constraint::Negative => match values.get(x).map(|&v| v) {
-                        Some(v) => if v > 0 { Ok(v) } else { Err(*x) },
-                        None => Err(*x)
-                    }
-                }
+            &Composite::Variable(ref x) => {
+                values.get(x).map(|&v| v).ok_or(*x)
             },
             &Composite::Floor(ref x, ref y) => {
                 let v_x = try!(x.evaluate(values)) as f64;

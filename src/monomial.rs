@@ -6,7 +6,7 @@ use std::convert::From;
 use std::collections::HashMap;
 use std::iter;
 
-use primitives::*;
+use primitives::{Monomial, Polynomial, IsConstant, Evaluable, CheckedDiv};
 
 impl Monomial{
     pub fn up_to_coefficient(&self, other: &Monomial) -> bool {
@@ -305,13 +305,6 @@ impl<'a> CheckedDiv<&'a Monomial> for Monomial {
         }
     }
 }
-
-//impl CheckedDiv<Monomial> for Monomial {
-//    type Output = Monomial;
-//    fn checked_div(&self, rhs: Monomial) -> Option<Self::Output> {
-//        self.checked_div(&rhs)
-//    }
-//}
 
 impl<'a, 'b> Div<&'a Monomial> for &'b Monomial {
     type Output = Monomial;

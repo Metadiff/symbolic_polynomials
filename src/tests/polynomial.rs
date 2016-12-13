@@ -1,15 +1,15 @@
 #[warn(unused_imports)]
-use super::super::*;
+use primitives::*;
 use std::rc::Rc;
 
 #[test]
 pub fn constructor() {
     let a = ::primitive(0);
-    let b_mon = ::Monomial{coefficient: 1,
-        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
-    let b = ::Polynomial::from(&(5 * &b_mon));
-    let minus_six = ::Polynomial::from(-6);
-    let thirteen = ::Polynomial::from(13);
+    let b_mon = Monomial{coefficient: 1,
+        powers: vec![(Composite::Variable(1), 1)]};
+    let b = Polynomial::from(&(5 * &b_mon));
+    let minus_six = Polynomial::from(-6);
+    let thirteen = Polynomial::from(13);
 
     assert!(minus_six.is_constant());
     assert!(minus_six.monomials.len() == 1);
@@ -25,13 +25,13 @@ pub fn constructor() {
     assert!(a.monomials.len() == 1);
     assert!(a.monomials[0].coefficient == 1);
     assert!(a.monomials[0].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(0), 1)]);
 
     assert!(!b.is_constant());
     assert!(b.monomials.len() == 1);
     assert!(b.monomials[0].coefficient == 5);
     assert!(b.monomials[0].powers ==
-        vec![(::Composite::Variable(1, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(1), 1)]);
 }
 
 #[test]
@@ -123,22 +123,22 @@ pub fn mul_test() {
     assert!(product.monomials.len() == 7);
     assert!(product.monomials[0].coefficient == 1);
     assert!(product.monomials[0].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 3), (::Composite::Variable(1, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(0), 3), (Composite::Variable(1), 1)]);
     assert!(product.monomials[1].coefficient == 2);
     assert!(product.monomials[1].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 2), (::Composite::Variable(1, Constraint::Unknown), 2)]);
+        vec![(Composite::Variable(0), 2), (Composite::Variable(1), 2)]);
     assert!(product.monomials[2].coefficient == 2);
     assert!(product.monomials[2].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 2)]);
+        vec![(Composite::Variable(0), 2)]);
     assert!(product.monomials[3].coefficient == 1);
     assert!(product.monomials[3].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 1), (::Composite::Variable(1, Constraint::Unknown), 3)]);
+        vec![(Composite::Variable(0), 1), (Composite::Variable(1), 3)]);
     assert!(product.monomials[4].coefficient == 3);
     assert!(product.monomials[4].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 1), (::Composite::Variable(1, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(0), 1), (Composite::Variable(1), 1)]);
     assert!(product.monomials[5].coefficient == 1);
     assert!(product.monomials[5].powers ==
-        vec![(::Composite::Variable(1, Constraint::Unknown), 2)]);
+        vec![(Composite::Variable(1), 2)]);
     assert!(product.monomials[6].coefficient == 2);
     assert!(product.monomials[6].powers.len() == 0);
 }
@@ -165,8 +165,8 @@ pub fn div_test() {
 
 #[test]
 pub fn add_test() {
-    let a_mon = ::Monomial{coefficient: 1,
-        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let a_mon = Monomial{coefficient: 1,
+        powers: vec![(Composite::Variable(0), 1)]};
     let a = ::primitive(0);
     let b = ::primitive(1);
     // a + b + 1
@@ -179,10 +179,10 @@ pub fn add_test() {
     assert!(a_plus_b_plus_1_v1.monomials.len() == 3);
     assert!(a_plus_b_plus_1_v1.monomials[0].coefficient == 1);
     assert!(a_plus_b_plus_1_v1.monomials[0].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(0), 1)]);
     assert!(a_plus_b_plus_1_v1.monomials[1].coefficient == 1);
     assert!(a_plus_b_plus_1_v1.monomials[1].powers ==
-        vec![(::Composite::Variable(1, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(1), 1)]);
     assert!(a_plus_b_plus_1_v1.monomials[2].coefficient == 1);
     assert!(a_plus_b_plus_1_v1.monomials[2].powers.len() == 0);
     assert!(a_plus_b_plus_1_v1 == a_plus_b_plus_1_v2);
@@ -190,10 +190,10 @@ pub fn add_test() {
     assert!(a_plus_b_plus_1_times_2.monomials.len() == 3);
     assert!(a_plus_b_plus_1_times_2.monomials[0].coefficient == 2);
     assert!(a_plus_b_plus_1_times_2.monomials[0].powers ==
-        vec![(::Composite::Variable(0, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(0), 1)]);
     assert!(a_plus_b_plus_1_times_2.monomials[1].coefficient == 2);
     assert!(a_plus_b_plus_1_times_2.monomials[1].powers ==
-        vec![(::Composite::Variable(1, Constraint::Unknown), 1)]);
+        vec![(Composite::Variable(1), 1)]);
     assert!(a_plus_b_plus_1_times_2.monomials[2].coefficient == 2);
     assert!(a_plus_b_plus_1_times_2.monomials[2].powers.len() == 0);
 }

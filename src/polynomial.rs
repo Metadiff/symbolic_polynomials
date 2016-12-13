@@ -4,7 +4,7 @@ use std::cmp::{min, Ord, Ordering};
 use std::collections::HashMap;
 use std::convert::From;
 
-use primitives::*;
+use primitives::{Monomial, Polynomial, IsConstant, Evaluable, CheckedDiv};
 
 impl IsConstant for Polynomial{
     fn is_constant(&self) -> bool {

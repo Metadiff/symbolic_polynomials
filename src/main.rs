@@ -1,10 +1,10 @@
-extern crate symints;
 use std::collections::HashMap;
 
+extern crate symints;
 use symints::*;
 
 
-type Shape = (Polynomial, Polynomial, Polynomial, Polynomial);
+type Shape = (SymInt, SymInt, SymInt, SymInt);
 
 enum ConvolutionMode{
     VALID,
@@ -38,7 +38,7 @@ fn convolution_2d_shape(image: &Shape, kernel: &Shape, stride: &Shape,
                         mode: ConvolutionMode) -> Option<Shape> {
     // Check everything is 2D
     if is_2d(image) && is_2d(kernel) && is_2d(stride) {
-        let (padding0, padding1) : (Polynomial, Polynomial) = match mode {
+        let (padding0, padding1) : (SymInt, SymInt) = match mode {
             ConvolutionMode::VALID => {
                 (0.into(), 0.into())
             },
