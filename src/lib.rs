@@ -4,7 +4,7 @@
 //! use std::collections::HashMap;
 //! extern crate symints;
 //! use symints::*;
-//!
+//! type SymInt = Polynomial;
 //!
 //! type Shape = (SymInt, SymInt, SymInt, SymInt);
 //!
@@ -111,7 +111,5 @@ mod integer_impl;
 #[cfg(test)]
 mod tests;
 
-pub use primitives::{IsConstant, Evaluable, CheckedDiv};
-pub use primitives::{primitive, max, min, ceil, floor};
-pub use primitives::Polynomial as SymInt;
+pub use primitives::*;
 pub use integer_impl::*;

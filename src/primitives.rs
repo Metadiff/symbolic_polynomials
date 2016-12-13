@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::result::Result;
 use std::rc::Rc;
 
-//
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
 pub struct Monomial {
@@ -86,7 +85,8 @@ pub trait CheckedDiv<RHS = Self> {
     fn checked_div(&self, other: RHS) -> Option<Self::Output>;
 }
 
-/// Returns a `Polynomial` representing the primitive variable `Composite::Variable(id)`.
+/// Returns a symbolic integer expression representing
+/// the primitive variable `Composite::Variable(id)`.
 pub fn primitive(id: u16) -> Polynomial {
     Polynomial{
         monomials: vec![Monomial{
@@ -96,7 +96,7 @@ pub fn primitive(id: u16) -> Polynomial {
     }
 }
 
-/// Computes a symbolic `max` between two polynomials.
+/// Computes a symbolic `max` between two symbolic integer expressions.
 pub fn max(left: &Polynomial, right: &Polynomial) -> Polynomial {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).unwrap();
@@ -113,7 +113,7 @@ pub fn max(left: &Polynomial, right: &Polynomial) -> Polynomial {
     }
 }
 
-/// Computes a symbolic `min` between two polynomials.
+/// Computes a symbolic `min` between two symbolic integer expressions.
 pub fn min(left: &Polynomial, right: &Polynomial) -> Polynomial {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).unwrap();
@@ -130,7 +130,7 @@ pub fn min(left: &Polynomial, right: &Polynomial) -> Polynomial {
     }
 }
 
-/// Computes a symbolic `ceil` between two polynomials.
+/// Computes a symbolic `ceil` between two symbolic integer expressions.
 pub fn ceil(left: &Polynomial, right: &Polynomial) -> Polynomial {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).unwrap() as f64;
@@ -150,7 +150,7 @@ pub fn ceil(left: &Polynomial, right: &Polynomial) -> Polynomial {
     }
 }
 
-/// Computes a symbolic `floor` between two polynomials.
+/// Computes a symbolic `floor` between two symbolic integer expressions.
 pub fn floor(left: &Polynomial, right: &Polynomial) -> Polynomial {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).unwrap() as f64;

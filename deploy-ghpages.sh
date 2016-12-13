@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ "$TRAVIS_RUST_VERSION" == "stable" ]; then
+if [[ "$TRAVIS_RUST_VERSION" == "stable" && "$TRAVIS_BRANCH" == "master" ]]; then
     cargo doc
     cd target/doc
     git init

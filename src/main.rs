@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 extern crate symints;
 use symints::*;
+type SymInt = Polynomial;
 
 
 type Shape = (SymInt, SymInt, SymInt, SymInt);
