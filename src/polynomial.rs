@@ -1,17 +1,10 @@
 use std::ops::{AddAssign, SubAssign, MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
 use std::fmt;
 use std::cmp::{min, Ord, Ordering};
+use std::collections::HashMap;
 use std::convert::From;
 
-use traits::*;
-use monomial::Monomial;
-
-/// A symbolic polynomial over the integers.
-#[derive(Clone, Default, Eq)]
-#[repr(C)]
-pub struct Polynomial {
-    pub monomials: Vec<Monomial>
-}
+use primitives::*;
 
 impl IsConstant for Polynomial{
     fn is_constant(&self) -> bool {
@@ -20,6 +13,16 @@ impl IsConstant for Polynomial{
             1 => self.monomials[0].is_constant(),
             _ => false
         }
+    }
+}
+
+impl Evaluable for Polynomial {
+    fn evaluate(&self, values: &HashMap<u16, i64>) -> Result<i64, u16> {
+        let mut value = 0;
+        for m in self.monomials.iter(){
+            value += try!(m.evaluate(values));
+        }
+        Ok(value)
     }
 }
 
@@ -79,28 +82,6 @@ impl From<Monomial> for Polynomial{
     }
 }
 
-//impl From<Monomial> for Polynomial{
-//    fn from(m: Monomial) -> Self{
-//        Polynomial{monomials: vec![m]}
-//    }
-//}
-
-impl PartialEq for Polynomial{
-    fn eq(&self, other: &Polynomial) -> bool {
-        match self.monomials.len() == other.monomials.len() {
-            false => false,
-            true => {
-                for (ms, mo) in self.monomials.iter().zip(other.monomials.iter()) {
-                    if ms != mo {
-                        return false
-                    }
-                }
-                true
-            }
-        }
-    }
-}
-
 impl<C> PartialEq<C> for Polynomial where C: Clone + Into<i64> {
     fn eq(&self, other: &C) -> bool {
         match self.monomials.len(){
@@ -120,9 +101,19 @@ impl PartialEq<Monomial> for Polynomial {
     }
 }
 
-impl PartialOrd for Polynomial {
-    fn partial_cmp(&self, other: &Polynomial) -> Option<Ordering> {
-        Some(self.cmp(other))
+impl PartialEq for Polynomial{
+    fn eq(&self, other: &Polynomial) -> bool {
+        match self.monomials.len() == other.monomials.len() {
+            false => false,
+            true => {
+                for (ms, mo) in self.monomials.iter().zip(other.monomials.iter()) {
+                    if ms != mo {
+                        return false
+                    }
+                }
+                true
+            }
+        }
     }
 }
 
@@ -139,6 +130,28 @@ impl<C> PartialOrd<C> for Polynomial where C: Clone + Into<i64> {
             1 => self.monomials[0].partial_cmp(&other),
             _ => Some(Ordering::Greater)
         }
+    }
+}
+
+impl PartialOrd<Monomial> for Polynomial {
+    fn partial_cmp(&self, other: &Monomial) -> Option<Ordering> {
+        match self.monomials.len() {
+            0 => {
+                if other.is_constant() {
+                    0.partial_cmp(&other.coefficient)
+                } else {
+                    Some(Ordering::Less)
+                }
+            }
+            1 => self.monomials[0].partial_cmp(other),
+            _ => Some(Ordering::Greater)
+        }
+    }
+}
+
+impl PartialOrd for Polynomial {
+    fn partial_cmp(&self, other: &Polynomial) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 

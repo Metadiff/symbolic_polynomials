@@ -1,13 +1,12 @@
-extern crate symints;
-
-use symints::*;
+#[warn(unused_imports)]
+use super::super::*;
 
 #[test]
 pub fn constructor() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let minus_six = symints::Monomial::from(-6);
-    let thirteen = symints::Monomial::from(13);
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let minus_six = ::Monomial::from(-6);
+    let thirteen = ::Monomial::from(13);
 
     assert!(minus_six.is_constant());
     assert!(minus_six.coefficient == -6);
@@ -19,16 +18,18 @@ pub fn constructor() {
 
     assert!(!a.is_constant());
     assert!(a.coefficient == 1);
-    assert!(a.powers == vec![(0, 1)]);
+    assert!(a.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1)]);
 }
 
 #[test]
 pub fn up_to_coefficient_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let three = Monomial::from(3);
-    let five = Monomial::from(5);
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
+    let three = ::Monomial::from(3);
+    let five = ::Monomial::from(5);
     // 2a
     let a_times_2 = 2 * &a;
     // -5a
@@ -61,20 +62,25 @@ pub fn up_to_coefficient_test() {
 
 #[test]
 pub fn partial_eq_test() {
-    let mut registry = symints::Registry::default();
-    let a_v1 = registry.new_monomial_variable();
-    let a_v2 = registry.specific_monomial_variable(0);
-    let b = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
+    let a_v2 = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
     // a^2
-    let a_square_v1 = Monomial{coefficient: 1, powers: vec![(0, 2)]};
-    let a_square_v2 = Monomial{coefficient: 1, powers: vec![(0, 2)]};
+    let a_square_v1 = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 2)]};
+    let a_square_v2 = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 2)]};
     // 2a^2
-    let two_a_square = Monomial{coefficient: 2, powers: vec![(0, 2)]};
+    let two_a_square = ::Monomial{coefficient: 2,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 2)]};
     // b^2
     let b_square = &b * &b;
 
-    assert!(a_v1 != 3 && 3 != a_v1);
-    assert!(a_v1 == a_v2 && a_v2 == a_v1);
+    assert!(a != 3 && 3 != a);
+    assert!(a == a_v2 && a_v2 == a);
 
     assert!(a_square_v1 == a_square_v2 && a_square_v2 == a_square_v1);
     assert!(two_a_square != a_square_v1 && a_square_v1 != two_a_square);
@@ -83,15 +89,19 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
     // 2a^2b
-    let a_square_b_times_2 = Monomial{coefficient: 2, powers: vec![(0, 2), (1, 1)]};
+    let a_square_b_times_2 = ::Monomial{coefficient: 2,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 2), (::Composite::Variable(1, Constraint::Unknown), 1)]};
     // 3a^2b
-    let a_square_b_times_3 = Monomial{coefficient: 3, powers: vec![(0, 2), (1, 1)]};
+    let a_square_b_times_3 = ::Monomial{coefficient: 3,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 2), (::Composite::Variable(1, Constraint::Unknown), 1)]};
     // 3ab
-    let ab_times_3 = Monomial{coefficient: 2, powers: vec![(0, 1), (1, 1)]};
+    let ab_times_3 = ::Monomial{coefficient: 2,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1), (::Composite::Variable(1, Constraint::Unknown), 1)]};
 
     assert!(a > 2 && 2 < a);
     assert!(b > 2 && 2 < b);
@@ -104,10 +114,12 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let c = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
+    let c = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(2, Constraint::Unknown), 1)]};
     // 2abc
     let abc_times_2 = &(2 * &a) * &(&b * &c);
     // b^2
@@ -117,22 +129,32 @@ pub fn mul_test() {
 
     assert!(abc_times_2.coefficient == 2);
     assert!(!abc_times_2.is_constant());
-    assert!(abc_times_2.powers == vec![(0, 1), (1, 1), (2, 1)]);
+    assert!(abc_times_2.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1),
+        (::Composite::Variable(1, Constraint::Unknown), 1),
+        (::Composite::Variable(2, Constraint::Unknown), 1)]);
 
     assert!(b_square.coefficient == 1);
-    assert!(b_square.powers == vec![(1, 2)]);
+    assert!(b_square.powers ==
+        vec![(::Composite::Variable(1, Constraint::Unknown), 2)]);
 
     assert!(ab_third_c_times_2.coefficient == 2);
-    assert!(ab_third_c_times_2.powers == vec![(0, 1), (1, 3), (2, 1)]);
+    assert!(ab_third_c_times_2.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1),
+        (::Composite::Variable(1, Constraint::Unknown), 3),
+        (::Composite::Variable(2, Constraint::Unknown), 1)]);
 }
 
 #[test]
 pub fn div_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let c = registry.new_monomial_variable();
-    let d = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
+    let c = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(2, Constraint::Unknown), 1)]};
+    let d = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(3, Constraint::Unknown), 1)]};
     // a^2
     let a_square = &a * &a;
     // b^2
@@ -151,22 +173,28 @@ pub fn div_test() {
     // abc
     let abc= &abc_times_2 / 2;
     assert!(abc.coefficient == 1);
-    assert!(abc.powers == vec![(0, 1), (1, 1), (2, 1)]);
+    assert!(abc.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1),
+        (::Composite::Variable(1, Constraint::Unknown), 1),
+        (::Composite::Variable(2, Constraint::Unknown), 1)]);
 
     // 2bc
     let bc2 = &abc_times_2 / &a;
     assert!(bc2.coefficient == 2);
-    assert!(bc2.powers == vec![(1, 1), (2, 1)]);
+    assert!(bc2.powers ==
+        vec![(::Composite::Variable(1, Constraint::Unknown), 1), (::Composite::Variable(2, Constraint::Unknown), 1)]);
 
     // 2ac
     let ac2 = &abc_times_2 / &b;
     assert!(ac2.coefficient == 2);
-    assert!(ac2.powers == vec![(0, 1), (2, 1)]);
+    assert!(ac2.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1), (::Composite::Variable(2, Constraint::Unknown), 1)]);
 
     // 2ab
     let ab2 = &abc_times_2 / &c;
     assert!(ab2.coefficient == 2);
-    assert!(ab2.powers == vec![(0, 1), (1, 1)]);
+    assert!(ab2.powers ==
+        vec![(::Composite::Variable(0, Constraint::Unknown), 1), (::Composite::Variable(1, Constraint::Unknown), 1)]);
 
     // 2
     let two = &(&(&abc_times_2 / &b) / &c) / &a;
@@ -176,17 +204,17 @@ pub fn div_test() {
     // 2c
     let c2 = &abc_times_2 / &ab;
     assert!(c2.coefficient == 2);
-    assert!(c2.powers == vec![(2, 1)]);
+    assert!(c2.powers == vec![(::Composite::Variable(2, Constraint::Unknown), 1)]);
 
     // 2b
     let b2 = &abc_times_2 / &ac;
     assert!(b2.coefficient == 2);
-    assert!(b2.powers == vec![(1, 1)]);
+    assert!(b2.powers == vec![(::Composite::Variable(1, Constraint::Unknown), 1)]);
 
     // 2a
     let a2 = &abc_times_2 / &bc;
     assert!(a2.coefficient == 2);
-    assert!(a2.powers == vec![(0, 1)]);
+    assert!(a2.powers == vec![(::Composite::Variable(0, Constraint::Unknown), 1)]);
 
     assert!(abc_times_2.checked_div(4).is_none());
     assert!(abc_times_2.checked_div(&a_square).is_none());
@@ -197,9 +225,10 @@ pub fn div_test() {
 
 #[test]
 pub fn add_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
 
     // a + b
     let a_plus_b = &a + &b;
@@ -209,6 +238,7 @@ pub fn add_test() {
 
     // a + 2b
     let a_plus_two_b = &a_plus_b + &b;
+    println!("{}", a_plus_two_b);
     assert!(a_plus_b.monomials.len() == 2);
     assert!(a_plus_two_b.monomials[0] == a);
     assert!(a_plus_two_b.monomials[1] == 2 * &b);
@@ -226,9 +256,10 @@ pub fn add_test() {
 
 #[test]
 pub fn sub_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
+    let a = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(0, Constraint::Unknown), 1)]};
+    let b = ::Monomial{coefficient: 1,
+        powers: vec![(::Composite::Variable(1, Constraint::Unknown), 1)]};
 
     // a - b
     let a_minus_b = &a - &b;
@@ -255,60 +286,4 @@ pub fn sub_test() {
 #[test]
 pub fn eval_test() {
     // TODO
-}
-
-#[test]
-pub fn floor_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let a_square = &a * &a;
-    let a_v2 = registry.floor(&a_square, &a);
-    let a_square_floor_b = registry.floor(&a_square, &b);
-
-    assert!(a_v2 == a);
-    assert!(a_square_floor_b.monomials.len() == 1);
-    assert!(a_square_floor_b.monomials[0].coefficient == 1);
-    assert!(a_square_floor_b.monomials[0].powers == vec![(2, 1)]);
-}
-
-#[test]
-pub fn ceil_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let a_square = &a * &a;
-    let a_v2 = registry.ceil(&a_square, &a);
-    let a_square_ceil_b = registry.ceil(&a_square, &b);
-
-    assert!(a_v2 == a);
-    assert!(a_square_ceil_b.monomials.len() == 1);
-    assert!(a_square_ceil_b.monomials[0].coefficient == 1);
-    assert!(a_square_ceil_b.monomials[0].powers == vec![(2, 1)]);
-}
-
-#[test]
-pub fn min_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let a_square = &a * &a;
-    let a_square_min_b = registry.min(&a_square, &b);
-
-    assert!(a_square_min_b.monomials.len() == 1);
-    assert!(a_square_min_b.monomials[0].coefficient == 1);
-    assert!(a_square_min_b.monomials[0].powers == vec![(2, 1)]);
-}
-
-#[test]
-pub fn max_test() {
-    let mut registry = symints::Registry::default();
-    let a = registry.new_monomial_variable();
-    let b = registry.new_monomial_variable();
-    let a_square = &a * &a;
-    let a_square_max_b = registry.max(&a_square, &b);
-
-    assert!(a_square_max_b.monomials.len() == 1);
-    assert!(a_square_max_b.monomials[0].coefficient == 1);
-    assert!(a_square_max_b.monomials[0].powers == vec![(2, 1)]);
 }

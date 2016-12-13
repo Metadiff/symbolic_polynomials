@@ -2,9 +2,7 @@ use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::{Ordering};
 use std::convert::From;
 
-use traits::*;
-use monomial::Monomial;
-use polynomial::Polynomial;
+use primitives::*;
 
 impl PartialEq<Monomial> for i64 {
     fn eq(&self, other: &Monomial) -> bool {

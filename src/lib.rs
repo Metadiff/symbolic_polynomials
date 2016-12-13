@@ -4,16 +4,13 @@
 //!
 //!
 
-mod traits;
+mod primitives;
+mod composite;
 mod monomial;
 mod polynomial;
-mod registry;
 mod integer_impl;
+#[cfg(test)]
+mod tests;
 
-pub use traits::*;
-pub use monomial::Monomial;
-pub use polynomial::Polynomial;
-pub use registry::Registry;
+pub use primitives::*;
 pub use integer_impl::*;
-
-
