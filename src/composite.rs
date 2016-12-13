@@ -3,11 +3,11 @@ use std::cmp::{Ord, Ordering};
 use std::collections::HashMap;
 use primitives::*;
 
-impl fmt::Display for Composite {
+impl<I> fmt::Display for Composite<I> where I: Id {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
-            &Composite::Variable(id) => {
-                try!(write!(f, "{}", (id as u8 + ('a' as u8)) as char))
+            &Composite::Variable(ref id) => {
+                try!(id.var_fmt(f))
             },
             &Composite::Floor(ref x, ref y) => {
                 try!(write!(f, "floor({}, {})", x, y))
@@ -26,11 +26,11 @@ impl fmt::Display for Composite {
     }
 }
 
-impl fmt::Debug for Composite {
+impl<I> fmt::Debug for Composite<I> where I: Id {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
-            &Composite::Variable(id) => {
-                try!(write!(f, "{}", (id as u8 + ('a' as u8)) as char))
+            &Composite::Variable(ref id) => {
+                try!(id.var_fmt(f))
             },
             &Composite::Floor(ref x, ref y) => {
                 try!(write!(f, "floor({:?}, {:?})", x, y))
@@ -49,14 +49,14 @@ impl fmt::Debug for Composite {
     }
 }
 
-impl PartialOrd for Composite {
-    fn partial_cmp(&self, other: &Composite) -> Option<Ordering> {
+impl<I> PartialOrd for Composite<I> where I: Id {
+    fn partial_cmp(&self, other: &Composite<I>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Composite {
-    fn cmp(&self, other: &Composite) -> Ordering {
+impl<I> Ord for Composite<I> where I: Id {
+    fn cmp(&self, other: &Composite<I>) -> Ordering {
         match self {
             &Composite::Variable(ref id) => {
                 match other {
@@ -115,11 +115,11 @@ impl Ord for Composite {
     }
 }
 
-impl Evaluable for Composite {
-    fn evaluate(&self, values: &HashMap<u16, i64>) -> Result<i64, u16> {
+impl<I> Evaluable<I> for Composite<I> where I: Id {
+    fn evaluate(&self, values: &HashMap<I, i64>) -> Result<i64, I> {
         match self {
             &Composite::Variable(ref x) => {
-                values.get(x).map(|&v| v).ok_or(*x)
+                values.get(x).map(|&v| v).ok_or(x.clone())
             },
             &Composite::Floor(ref x, ref y) => {
                 let v_x = try!(x.evaluate(values)) as f64;

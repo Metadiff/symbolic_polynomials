@@ -4,9 +4,9 @@ use std::cmp::{min, Ord, Ordering};
 use std::collections::HashMap;
 use std::convert::From;
 
-use primitives::{Monomial, Polynomial, IsConstant, Evaluable, CheckedDiv};
+use primitives::{Monomial, Polynomial, IsConstant, Evaluable, CheckedDiv, Id};
 
-impl IsConstant for Polynomial{
+impl<I> IsConstant for Polynomial<I> where I: Id {
     fn is_constant(&self) -> bool {
         match self.monomials.len(){
             0 => true,
@@ -16,8 +16,8 @@ impl IsConstant for Polynomial{
     }
 }
 
-impl Evaluable for Polynomial {
-    fn evaluate(&self, values: &HashMap<u16, i64>) -> Result<i64, u16> {
+impl<I> Evaluable<I> for Polynomial<I> where I: Id {
+    fn evaluate(&self, values: &HashMap<I, i64>) -> Result<i64, I> {
         let mut value = 0;
         for m in self.monomials.iter(){
             value += try!(m.evaluate(values));
@@ -26,7 +26,7 @@ impl Evaluable for Polynomial {
     }
 }
 
-impl fmt::Display for Polynomial {
+impl<I> fmt::Display for Polynomial<I> where I: Id {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self.monomials.len() {
             0 => write!(f, "0"),
@@ -45,7 +45,7 @@ impl fmt::Display for Polynomial {
     }
 }
 
-impl fmt::Debug for Polynomial {
+impl<I> fmt::Debug for Polynomial<I> where I: Id {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self.monomials.len() {
             0 => write!(f, "0"),
@@ -64,25 +64,25 @@ impl fmt::Debug for Polynomial {
     }
 }
 
-impl<C> From<C> for Polynomial where C: Clone + Into<i64>{
+impl<I, C> From<C> for Polynomial<I> where I: Id, C: Clone + Into<i64>{
     fn from(c: C) -> Self{
         Polynomial{monomials: vec![Monomial::from(c)]}
     }
 }
 
-impl<'a> From<&'a Monomial> for Polynomial{
-    fn from(m: &'a Monomial) -> Self{
+impl<'a, I> From<&'a Monomial<I>> for Polynomial<I> where I: Id {
+    fn from(m: &'a Monomial<I>) -> Self{
         Polynomial{monomials: vec![m.clone()]}
     }
 }
 
-impl From<Monomial> for Polynomial{
-    fn from(m: Monomial) -> Self{
+impl<I> From<Monomial<I>> for Polynomial<I> where I: Id {
+    fn from(m: Monomial<I>) -> Self{
         Polynomial{monomials: vec![m]}
     }
 }
 
-impl<C> PartialEq<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> PartialEq<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn eq(&self, other: &C) -> bool {
         match self.monomials.len(){
             1 => self.monomials[0].eq(other),
@@ -91,8 +91,8 @@ impl<C> PartialEq<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl PartialEq<Monomial> for Polynomial {
-    fn eq(&self, other: &Monomial) -> bool {
+impl<I> PartialEq<Monomial<I>> for Polynomial<I> where I: Id {
+    fn eq(&self, other: &Monomial<I>) -> bool {
         match self.monomials.len(){
             0 => other.coefficient == 0,
             1 => self.monomials[0].eq(other),
@@ -101,8 +101,8 @@ impl PartialEq<Monomial> for Polynomial {
     }
 }
 
-impl PartialEq for Polynomial{
-    fn eq(&self, other: &Polynomial) -> bool {
+impl<I> PartialEq for Polynomial<I> where I: Id {
+    fn eq(&self, other: &Polynomial<I>) -> bool {
         match self.monomials.len() == other.monomials.len() {
             false => false,
             true => {
@@ -117,7 +117,7 @@ impl PartialEq for Polynomial{
     }
 }
 
-impl<C> PartialOrd<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> PartialOrd<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn partial_cmp(&self, c: &C) -> Option<Ordering> {
         let other: i64 = (*c).clone().into();
         match self.monomials.len() {
@@ -133,8 +133,8 @@ impl<C> PartialOrd<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl PartialOrd<Monomial> for Polynomial {
-    fn partial_cmp(&self, other: &Monomial) -> Option<Ordering> {
+impl<I> PartialOrd<Monomial<I>> for Polynomial<I> where I: Id {
+    fn partial_cmp(&self, other: &Monomial<I>) -> Option<Ordering> {
         match self.monomials.len() {
             0 => {
                 if other.is_constant() {
@@ -149,14 +149,14 @@ impl PartialOrd<Monomial> for Polynomial {
     }
 }
 
-impl PartialOrd for Polynomial {
-    fn partial_cmp(&self, other: &Polynomial) -> Option<Ordering> {
+impl<I> PartialOrd for Polynomial<I> where I: Id {
+    fn partial_cmp(&self, other: &Polynomial<I>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Polynomial {
-    fn cmp(&self, other: &Polynomial) -> Ordering {
+impl<I> Ord for Polynomial<I> where I: Id {
+    fn cmp(&self, other: &Polynomial<I>) -> Ordering {
         let m = min(self.monomials.len(), other.monomials.len());
         for i in 0..m{
             match Ord::cmp(&self.monomials[i], &other.monomials[i]){
@@ -168,7 +168,7 @@ impl Ord for Polynomial {
     }
 }
 
-impl<C> MulAssign<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> MulAssign<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn mul_assign(&mut self, rhs: C){
         for m in self.monomials.iter_mut() {
             *m *= rhs.clone();
@@ -176,8 +176,8 @@ impl<C> MulAssign<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a, C> Mul<C> for &'a Polynomial where C: Clone + Into<i64> {
-    type Output = Polynomial;
+impl<'a, I, C> Mul<C> for &'a Polynomial<I> where I: Id, C: Clone + Into<i64> {
+    type Output = Polynomial<I>;
     fn mul(self, rhs: C) -> Self::Output {
         let mut result = self.clone();
         result *= rhs;
@@ -185,29 +185,29 @@ impl<'a, C> Mul<C> for &'a Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a> MulAssign<&'a Monomial> for Polynomial {
-    fn mul_assign(&mut self, rhs: &'a Monomial){
+impl<'a, I> MulAssign<&'a Monomial<I>> for Polynomial<I> where I: Id {
+    fn mul_assign(&mut self, rhs: &'a Monomial<I>){
         for mut m in self.monomials.iter_mut() {
             *m *= rhs;
         }
     }
 }
 
-impl<'a, 'b> Mul<&'a Monomial> for &'b Polynomial{
-    type Output = Polynomial;
-    fn mul(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, 'b, I> Mul<&'a Monomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn mul(self, rhs: &'a Monomial<I>) -> Self::Output {
         let mut result = self.clone();
         result *= rhs;
         result
     }
 }
 
-impl<'a> MulAssign<&'a Polynomial> for Polynomial {
-    fn mul_assign(&mut self, rhs: &'a Polynomial){
+impl<'a, I> MulAssign<&'a Polynomial<I>> for Polynomial<I> where I: Id {
+    fn mul_assign(&mut self, rhs: &'a Polynomial<I>){
         match self.monomials.len() {
             0 => {},
             _ => {
-                let mut result = Polynomial::default();
+                let mut result = Polynomial{monomials: Vec::new()};
                 for m in self.monomials.iter(){
                     result += &(m * rhs);
                 }
@@ -217,17 +217,17 @@ impl<'a> MulAssign<&'a Polynomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Mul<&'a Polynomial> for &'b Polynomial{
-    type Output = Polynomial;
-    fn mul(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, 'b, I> Mul<&'a Polynomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn mul(self, rhs: &'a Polynomial<I>) -> Self::Output {
         let mut result = self.clone();
         result *= rhs;
         result
     }
 }
 
-impl<C> CheckedDiv<C> for Polynomial where C: Clone + Into<i64> {
-    type Output = Polynomial;
+impl<I, C> CheckedDiv<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
+    type Output = Polynomial<I>;
     fn checked_div(&self, rhs: C) -> Option<Self::Output> {
         let result = Polynomial{monomials: self.monomials.iter()
             .cloned()
@@ -241,22 +241,22 @@ impl<C> CheckedDiv<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a, C> Div<C> for &'a Polynomial where C: Clone + Into<i64> {
-    type Output = Polynomial;
+impl<'a, I, C> Div<C> for &'a Polynomial<I> where I: Id, C: Clone + Into<i64> {
+    type Output = Polynomial<I>;
     fn div(self, rhs: C) -> Self::Output {
         self.checked_div(rhs).unwrap()
     }
 }
 
-impl<C> DivAssign<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> DivAssign<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn div_assign(&mut self, rhs: C){
-        self.monomials = ((self as &Polynomial) / rhs).monomials;
+        self.monomials = ((self as &Polynomial<I>) / rhs).monomials;
     }
 }
 
-impl<'a> CheckedDiv<&'a Monomial> for Polynomial {
-    type Output = Polynomial;
-    fn checked_div(&self, rhs: &'a Monomial) -> Option<Self::Output> {
+impl<'a, I> CheckedDiv<&'a Monomial<I>> for Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn checked_div(&self, rhs: &'a Monomial<I>) -> Option<Self::Output> {
         let result = Polynomial{monomials: self.monomials.iter()
             .cloned()
             .filter_map(|ref m| m.checked_div(rhs))
@@ -269,23 +269,23 @@ impl<'a> CheckedDiv<&'a Monomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Div<&'a Monomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn div(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, 'b, I> Div<&'a Monomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn div(self, rhs: &'a Monomial<I>) -> Self::Output {
         self.checked_div(rhs).unwrap()
     }
 }
 
-impl<'a> DivAssign<&'a Monomial> for Polynomial {
-    fn div_assign(&mut self, rhs: &'a Monomial){
-        self.monomials = ((self as &Polynomial) / rhs).monomials;
+impl<'a, I> DivAssign<&'a Monomial<I>> for Polynomial<I> where I: Id {
+    fn div_assign(&mut self, rhs: &'a Monomial<I>){
+        self.monomials = ((self as &Polynomial<I>) / rhs).monomials;
     }
 }
 
-impl<'a> CheckedDiv<&'a Polynomial> for Polynomial {
-    type Output = Polynomial;
-    fn checked_div(&self, rhs: &'a Polynomial) -> Option<Self::Output> {
-        let mut result = Polynomial::default();
+impl<'a, I> CheckedDiv<&'a Polynomial<I>> for Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn checked_div(&self, rhs: &'a Polynomial<I>) -> Option<Self::Output> {
+        let mut result = Polynomial{monomials: Vec::new()};
         let mut reminder = self.clone();
         while ! reminder.is_constant() {
             match (reminder.monomials[0]).checked_div(&rhs.monomials[0]) {
@@ -304,27 +304,27 @@ impl<'a> CheckedDiv<&'a Polynomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Div<&'a Polynomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn div(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, 'b, I> Div<&'a Polynomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn div(self, rhs: &'a Polynomial<I>) -> Self::Output {
         self.checked_div(rhs).unwrap()
     }
 }
 
-impl<'a> DivAssign<&'a Polynomial> for Polynomial {
-    fn div_assign(&mut self, rhs: &'a Polynomial){
-        self.monomials = ((self as &Polynomial) / rhs).monomials;
+impl<'a, I> DivAssign<&'a Polynomial<I>> for Polynomial<I> where I: Id {
+    fn div_assign(&mut self, rhs: &'a Polynomial<I>){
+        self.monomials = ((self as &Polynomial<I>) / rhs).monomials;
     }
 }
 
-impl<'a> Neg for &'a Polynomial {
-    type Output = Polynomial;
+impl<'a, I> Neg for &'a Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
     fn neg(self) -> Self::Output {
         Polynomial{monomials: self.monomials.iter().cloned().map(|ref x| -x).collect()}
     }
 }
 
-impl<C> AddAssign<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> AddAssign<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn add_assign(&mut self, c: C) {
         let rhs: i64 = c.into();
         if rhs != 0 {
@@ -349,8 +349,8 @@ impl<C> AddAssign<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a, C> Add<C> for &'a Polynomial where C: Clone + Into<i64> {
-    type Output = Polynomial;
+impl<'a, I, C> Add<C> for &'a Polynomial<I> where I: Id, C: Clone + Into<i64> {
+    type Output = Polynomial<I>;
     fn add(self, rhs: C) -> Self::Output {
         let mut result = self.clone();
         result += rhs;
@@ -358,8 +358,8 @@ impl<'a, C> Add<C> for &'a Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a> AddAssign<&'a Monomial> for Polynomial {
-    fn add_assign(&mut self, rhs: &'a Monomial) {
+impl<'a, I> AddAssign<&'a Monomial<I>> for Polynomial<I> where I: Id {
+    fn add_assign(&mut self, rhs: &'a Monomial<I>) {
         if rhs.coefficient != 0 {
             for i in 0..self.monomials.len() {
                 if self.monomials[i].up_to_coefficient(rhs) {
@@ -382,17 +382,17 @@ impl<'a> AddAssign<&'a Monomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Add<&'a Monomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn add(self, rhs: &'a Monomial) -> Self::Output{
+impl<'a, 'b, I> Add<&'a Monomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn add(self, rhs: &'a Monomial<I>) -> Self::Output{
         let mut result = self.clone();
         result += rhs;
         result
     }
 }
 
-impl<'a> AddAssign<&'a Polynomial> for Polynomial {
-    fn add_assign(&mut self, rhs: &'a Polynomial) {
+impl<'a, I> AddAssign<&'a Polynomial<I>> for Polynomial<I> where I: Id {
+    fn add_assign(&mut self, rhs: &'a Polynomial<I>) {
         let mut i1 = 0;
         let mut i2 = 0;
         while i1 < self.monomials.len() && i2 < rhs.monomials.len() {
@@ -419,16 +419,16 @@ impl<'a> AddAssign<&'a Polynomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Add<&'a Polynomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn add(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, 'b, I> Add<&'a Polynomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn add(self, rhs: &'a Polynomial<I>) -> Self::Output {
         let mut result = self.clone();
         result += rhs;
         result
     }
 }
 
-impl<C> SubAssign<C> for Polynomial where C: Clone + Into<i64> {
+impl<I, C> SubAssign<C> for Polynomial<I> where I: Id, C: Clone + Into<i64> {
     fn sub_assign(&mut self, c: C) {
         let rhs: i64 = c.into();
         if rhs != 0 {
@@ -455,8 +455,8 @@ impl<C> SubAssign<C> for Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a, C> Sub<C> for &'a Polynomial where C: Clone + Into<i64> {
-    type Output = Polynomial;
+impl<'a, I, C> Sub<C> for &'a Polynomial<I> where I: Id, C: Clone + Into<i64> {
+    type Output = Polynomial<I>;
     fn sub(self, rhs: C) -> Self::Output {
         let mut result = self.clone();
         result -= rhs;
@@ -464,8 +464,8 @@ impl<'a, C> Sub<C> for &'a Polynomial where C: Clone + Into<i64> {
     }
 }
 
-impl<'a> SubAssign<&'a Monomial> for Polynomial {
-    fn sub_assign(&mut self, rhs: &'a Monomial) {
+impl<'a, I> SubAssign<&'a Monomial<I>> for Polynomial<I> where I: Id  {
+    fn sub_assign(&mut self, rhs: &'a Monomial<I>) {
         if rhs.coefficient != 0 {
             for i in 0..self.monomials.len() {
                 if self.monomials[i].up_to_coefficient(rhs) {
@@ -488,17 +488,17 @@ impl<'a> SubAssign<&'a Monomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Sub<&'a Monomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn sub(self, rhs: &'a Monomial) -> Self::Output{
+impl<'a, 'b, I> Sub<&'a Monomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn sub(self, rhs: &'a Monomial<I>) -> Self::Output{
         let mut result = self.clone();
         result -= rhs;
         result
     }
 }
 
-impl<'a> SubAssign<&'a Polynomial> for Polynomial {
-    fn sub_assign(&mut self, rhs: &'a Polynomial) {
+impl<'a, I> SubAssign<&'a Polynomial<I>> for Polynomial<I> where I: Id {
+    fn sub_assign(&mut self, rhs: &'a Polynomial<I>) {
         let mut i1 = 0;
         let mut i2 = 0;
         while i1 < self.monomials.len() && i2 < rhs.monomials.len() {
@@ -525,9 +525,9 @@ impl<'a> SubAssign<&'a Polynomial> for Polynomial {
     }
 }
 
-impl<'a, 'b> Sub<&'a Polynomial> for &'b Polynomial {
-    type Output = Polynomial;
-    fn sub(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, 'b, I> Sub<&'a Polynomial<I>> for &'b Polynomial<I> where I: Id {
+    type Output = Polynomial<I>;
+    fn sub(self, rhs: &'a Polynomial<I>) -> Self::Output {
         let mut result = self.clone();
         result -= rhs;
         result

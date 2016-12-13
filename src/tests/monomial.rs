@@ -1,12 +1,15 @@
 #[warn(unused_imports)]
 use primitives::*;
 
+type TestMonomial = Monomial<u16>;
+type TestPolynomial = Polynomial<u16>;
+
 #[test]
 pub fn constructor() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let minus_six = Monomial::from(-6);
-    let thirteen = Monomial::from(13);
+    let minus_six = TestMonomial::from(-6);
+    let thirteen = TestMonomial::from(13);
 
     assert!(minus_six.is_constant());
     assert!(minus_six.coefficient == -6);
@@ -24,12 +27,12 @@ pub fn constructor() {
 
 #[test]
 pub fn up_to_coefficient_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
-    let three = Monomial::from(3);
-    let five = Monomial::from(5);
+    let three = TestMonomial::from(3);
+    let five = TestMonomial::from(5);
     // 2a
     let a_times_2 = 2 * &a;
     // -5a
@@ -62,19 +65,19 @@ pub fn up_to_coefficient_test() {
 
 #[test]
 pub fn partial_eq_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
-    let a_v2 = Monomial{coefficient: 1,
+    let a_v2 = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
     // a^2
-    let a_square_v1 = Monomial{coefficient: 1,
+    let a_square_v1 = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 2)]};
-    let a_square_v2 = Monomial{coefficient: 1,
+    let a_square_v2 = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 2)]};
     // 2a^2
-    let two_a_square = Monomial{coefficient: 2,
+    let two_a_square = TestMonomial{coefficient: 2,
         powers: vec![(Composite::Variable(0), 2)]};
     // b^2
     let b_square = &b * &b;
@@ -89,18 +92,18 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
     // 2a^2b
-    let a_square_b_times_2 = Monomial{coefficient: 2,
+    let a_square_b_times_2 = TestMonomial{coefficient: 2,
         powers: vec![(Composite::Variable(0), 2), (Composite::Variable(1), 1)]};
     // 3a^2b
-    let a_square_b_times_3 = Monomial{coefficient: 3,
+    let a_square_b_times_3 = TestMonomial{coefficient: 3,
         powers: vec![(Composite::Variable(0), 2), (Composite::Variable(1), 1)]};
     // 3ab
-    let ab_times_3 = Monomial{coefficient: 2,
+    let ab_times_3 = TestMonomial{coefficient: 2,
         powers: vec![(Composite::Variable(0), 1), (Composite::Variable(1), 1)]};
 
     assert!(a > 2 && 2 < a);
@@ -114,11 +117,11 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
-    let c = Monomial{coefficient: 1,
+    let c = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(2), 1)]};
     // 2abc
     let abc_times_2 = &(2 * &a) * &(&b * &c);
@@ -147,13 +150,13 @@ pub fn mul_test() {
 
 #[test]
 pub fn div_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
-    let c = Monomial{coefficient: 1,
+    let c = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(2), 1)]};
-    let d = Monomial{coefficient: 1,
+    let d = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(3), 1)]};
     // a^2
     let a_square = &a * &a;
@@ -225,9 +228,9 @@ pub fn div_test() {
 
 #[test]
 pub fn add_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
 
     // a + b
@@ -256,9 +259,9 @@ pub fn add_test() {
 
 #[test]
 pub fn sub_test() {
-    let a = Monomial{coefficient: 1,
+    let a = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let b = Monomial{coefficient: 1,
+    let b = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1), 1)]};
 
     // a - b

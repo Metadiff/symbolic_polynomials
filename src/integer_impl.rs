@@ -1,23 +1,30 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::{Ordering};
+use std::fmt;
 use std::convert::From;
 
 use primitives::*;
 
-impl PartialEq<Monomial> for i64 {
-    fn eq(&self, other: &Monomial) -> bool {
+impl VariableDisplay for u16 {
+    fn var_fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{}", (*self as u8 + ('a' as u8)) as char)
+    }
+}
+
+impl<I> PartialEq<Monomial<I>> for i64 where I: Id {
+    fn eq(&self, other: &Monomial<I>) -> bool {
         other.eq(self)
     }
 }
 
-impl PartialEq<Polynomial> for i64 {
-    fn eq(&self, other: &Polynomial) -> bool {
+impl<I> PartialEq<Polynomial<I>> for i64 where I: Id {
+    fn eq(&self, other: &Polynomial<I>) -> bool {
         other.eq(self)
     }
 }
 
-impl PartialOrd<Monomial> for i64 {
-    fn partial_cmp(&self, other: &Monomial) -> Option<Ordering> {
+impl<I> PartialOrd<Monomial<I>> for i64 where I: Id {
+    fn partial_cmp(&self, other: &Monomial<I>) -> Option<Ordering> {
         match other.partial_cmp(self) {
             Some(Ordering::Less) => Some(Ordering::Greater),
             Some(Ordering::Equal) => Some(Ordering::Equal),
@@ -27,8 +34,8 @@ impl PartialOrd<Monomial> for i64 {
     }
 }
 
-impl PartialOrd<Polynomial> for i64 {
-    fn partial_cmp(&self, other: &Polynomial) -> Option<Ordering> {
+impl<I> PartialOrd<Polynomial<I>> for i64 where I: Id {
+    fn partial_cmp(&self, other: &Polynomial<I>) -> Option<Ordering> {
         match other.partial_cmp(self) {
             Some(Ordering::Less) => Some(Ordering::Greater),
             Some(Ordering::Equal) => Some(Ordering::Equal),
@@ -38,9 +45,9 @@ impl PartialOrd<Polynomial> for i64 {
     }
 }
 
-impl<'a> Div<&'a Monomial> for i64{
-    type Output = Option<Monomial>;
-    fn div(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, I> Div<&'a Monomial<I>> for i64 where I: Id {
+    type Output = Option<Monomial<I>>;
+    fn div(self, rhs: &'a Monomial<I>) -> Self::Output {
         if rhs.is_constant() {
             match self.checked_rem(rhs.coefficient) {
                 Some(0) => Some(Monomial::from(self / rhs.coefficient)),
@@ -52,9 +59,9 @@ impl<'a> Div<&'a Monomial> for i64{
     }
 }
 
-impl<'a> Div<&'a Polynomial> for i64{
-    type Output = Option<Polynomial>;
-    fn div(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, I> Div<&'a Polynomial<I>> for i64 where I: Id {
+    type Output = Option<Polynomial<I>>;
+    fn div(self, rhs: &'a Polynomial<I>) -> Self::Output {
         match rhs.monomials.len() {
             1 => match self / &(rhs.monomials[0]) {
                 Some(m) => Some(Polynomial{monomials: vec![m]}),
@@ -65,44 +72,37 @@ impl<'a> Div<&'a Polynomial> for i64{
     }
 }
 
-impl<'a> Mul<&'a Monomial> for i64{
-    type Output = Monomial;
-    fn mul(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, I> Mul<&'a Monomial<I>> for i64 where I: Id {
+    type Output = Monomial<I>;
+    fn mul(self, rhs: &'a Monomial<I>) -> Self::Output {
         rhs.mul(self)
     }
 }
 
-impl<'a> Mul<&'a Polynomial> for i64{
-    type Output = Polynomial;
-    fn mul(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, I> Mul<&'a Polynomial<I>> for i64 where I: Id {
+    type Output = Polynomial<I>;
+    fn mul(self, rhs: &'a Polynomial<I>) -> Self::Output {
         rhs.mul(self)
     }
 }
 
-impl<'a> Add<&'a Monomial> for i64{
-    type Output = Polynomial;
-    fn add(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, I> Add<&'a Monomial<I>> for i64 where I: Id {
+    type Output = Polynomial<I>;
+    fn add(self, rhs: &'a Monomial<I>) -> Self::Output {
         rhs.add(self)
     }
 }
 
-impl<'a> Add<&'a Polynomial> for i32{
-    type Output = Polynomial;
-    fn add(self, rhs: &'a Polynomial) -> Self::Output {
-        rhs.add(self)
-    }
-}
-
-impl<'a> Sub<&'a Monomial> for i64{
-    type Output = Polynomial;
-    fn sub(self, rhs: &'a Monomial) -> Self::Output {
+impl<'a, I> Sub<&'a Monomial<I>> for i64 where I: Id {
+    type Output = Polynomial<I>;
+    fn sub(self, rhs: &'a Monomial<I>) -> Self::Output {
         -&(rhs.add(-self))
     }
 }
 
-impl<'a> Sub<&'a Polynomial> for i64{
-    type Output = Polynomial;
-    fn sub(self, rhs: &'a Polynomial) -> Self::Output {
+impl<'a, I> Sub<&'a Polynomial<I>> for i64 where I: Id {
+    type Output = Polynomial<I>;
+    fn sub(self, rhs: &'a Polynomial<I>) -> Self::Output {
         -&(rhs.add(-self))
     }
 }

@@ -4,7 +4,7 @@
 //! use std::collections::HashMap;
 //! extern crate symints;
 //! use symints::*;
-//! type SymInt = Polynomial;
+//! type SymInt = Polynomial<u16>;
 //!
 //! type Shape = (SymInt, SymInt, SymInt, SymInt);
 //!

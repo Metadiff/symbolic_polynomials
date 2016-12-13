@@ -2,14 +2,17 @@
 use primitives::*;
 use std::rc::Rc;
 
+type TestMonomial = Monomial<u16>;
+type TestPolynomial = Polynomial<u16>;
+
 #[test]
 pub fn constructor() {
-    let a = ::primitive(0);
-    let b_mon = Monomial{coefficient: 1,
-        powers: vec![(Composite::Variable(1), 1)]};
-    let b = Polynomial::from(&(5 * &b_mon));
-    let minus_six = Polynomial::from(-6);
-    let thirteen = Polynomial::from(13);
+    let a = primitive::<u16>(0);
+    let b_mon = TestMonomial{coefficient: 1,
+        powers: vec![(Composite::Variable(1 as u16), 1)]};
+    let b = TestPolynomial::from(&(5 * &b_mon));
+    let minus_six = TestPolynomial::from(-6);
+    let thirteen = TestPolynomial::from(13);
 
     assert!(minus_six.is_constant());
     assert!(minus_six.monomials.len() == 1);
@@ -165,7 +168,7 @@ pub fn div_test() {
 
 #[test]
 pub fn add_test() {
-    let a_mon = Monomial{coefficient: 1,
+    let a_mon = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
     let a = ::primitive(0);
     let b = ::primitive(1);
@@ -221,8 +224,8 @@ pub fn eval_test() {
 
 #[test]
 pub fn max_test() {
-    let thirteen = Polynomial::from(13);
-    let three = Polynomial::from(3);
+    let thirteen = TestPolynomial::from(13);
+    let three = TestPolynomial::from(3);
     let thirteen_v2 = max(&thirteen, &three);
     let a = primitive(0);
     let b = primitive(1);
@@ -243,8 +246,8 @@ pub fn max_test() {
 
 #[test]
 pub fn min_test() {
-    let thirteen = Polynomial::from(13);
-    let three = Polynomial::from(3);
+    let thirteen = TestPolynomial::from(13);
+    let three = TestPolynomial::from(3);
     let three_v2 = min(&thirteen, &three);
     let a = primitive(0);
     let b = primitive(1);
@@ -265,8 +268,8 @@ pub fn min_test() {
 
 #[test]
 pub fn ceil_test() {
-    let thirteen = Polynomial::from(13);
-    let three = Polynomial::from(3);
+    let thirteen = TestPolynomial::from(13);
+    let three = TestPolynomial::from(3);
     let five = ceil(&thirteen, &three);
     let a = primitive(0);
     let b = primitive(1);
@@ -285,8 +288,8 @@ pub fn ceil_test() {
 
 #[test]
 pub fn floor_test() {
-    let thirteen = Polynomial::from(13);
-    let three = Polynomial::from(3);
+    let thirteen = TestPolynomial::from(13);
+    let three = TestPolynomial::from(3);
     let four = floor(&thirteen, &three);
     let a = primitive(0);
     let b = primitive(1);
