@@ -4,6 +4,7 @@ use std::fmt;
 use std::convert::From;
 
 use primitives::*;
+use functions::*;
 
 impl VariableDisplay for u16 {
     fn var_fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {

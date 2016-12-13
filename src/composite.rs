@@ -1,10 +1,10 @@
-use std::fmt;
 use std::cmp::{Ord, Ordering};
-use std::collections::HashMap;
-use primitives::*;
 
-impl<I, C, P> fmt::Display for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+use primitives::*;
+use functions::*;
+
+impl<I, C, P> ::std::fmt::Display for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
                 try!(id.var_fmt(f))
@@ -26,8 +26,8 @@ impl<I, C, P> fmt::Display for Composite<I, C, P> where I: Id, C: Coefficient, P
     }
 }
 
-impl<I, C, P> fmt::Debug for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl<I, C, P> ::std::fmt::Debug for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
                 try!(id.var_fmt(f))
@@ -116,7 +116,7 @@ impl<I, C, P> Ord for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
 }
 
 impl<I, C, P> Evaluable<I, C> for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
+    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         match self {
             &Composite::Variable(ref x) => {
                 values.get(x).map(|v| v.clone()).ok_or(x.clone())

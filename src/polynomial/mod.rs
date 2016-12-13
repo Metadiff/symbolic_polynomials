@@ -1,10 +1,8 @@
 use std::ops::{AddAssign, SubAssign, MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
-use std::fmt;
 use std::cmp::{Ord, Ordering};
-use std::collections::HashMap;
-use std::convert::From;
 
 use primitives::*;
+use functions::*;
 
 impl<I, C, P> IsConstant for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
     fn is_constant(&self) -> bool {
@@ -17,7 +15,7 @@ impl<I, C, P> IsConstant for Polynomial<I, C, P> where I: Id, C: Coefficient, P:
 }
 
 impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
+    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = C::zero();
         for m in self.monomials.iter(){
             value += try!(m.evaluate(values));
@@ -26,8 +24,8 @@ impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P> where I: Id, C: Coefficien
     }
 }
 
-impl<I, C, P> fmt::Display for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl<I, C, P> ::std::fmt::Display for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         match self.monomials.len() {
             0 => write!(f, "0"),
             _ => {
@@ -45,8 +43,8 @@ impl<I, C, P> fmt::Display for Polynomial<I, C, P> where I: Id, C: Coefficient, 
     }
 }
 
-impl<I, C, P> fmt::Debug for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl<I, C, P> ::std::fmt::Debug for Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         match self.monomials.len() {
             0 => write!(f, "0"),
             _ => {
@@ -530,3 +528,6 @@ impl<'a, 'b, I, C, P> Sub<&'a Polynomial<I, C, P>> for &'b Polynomial<I, C, P> w
         result
     }
 }
+
+#[cfg(test)]
+mod tests;

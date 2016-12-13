@@ -1,3 +1,24 @@
+//! The crate provides manipulation, calculation and evaluation of integer polynomials.
+//!
+//! The central struct of the crate is `Polynomial<I, C, P>`. The three generic arguments
+//! specify the types of three internal parts:
+//!
+//! I - the type which uniquely identifies a single primitive variable, e.g. if we have a^x ,
+//! then `a: I`. Note that this does not mean that it is an `Integer`, but rather it is a type
+//! which can uniquely defined variables. For instance one can use a `String` by naming each
+//! variable. The type must implement `VariableDisplay` in order to provide a way for displaying
+//! a variable differently from `Display`.
+//!
+//! C - the primitive `Integer` type of the internal coefficients for each monomial.
+//! The `Polynomial<C, I, P>` will have implemented standard operators for interacting with type `C`.
+//! Whenever you evaluate a polynomial, the output would be of this type.
+//!
+//! P - the `Integer` type type of the power values of each monomial, e.g. if we have a^x ,
+//! then `x: P`. Note that it is required that `P` is an `Unsigned` type.
+//!
+//! The choice of `C` and `P` should depend on the problem you are using the library for. If you
+//! do not expect too high power values setting `P` to `u8` or `u16` should suffice. The `I` can
+//! be literally anything you want. In all of the tests `Polynomial<u16, i64, u8>` is used.
 //!
 //! # Examples
 //! ```
@@ -105,13 +126,13 @@
 
 extern crate num;
 
+mod functions;
 mod primitives;
 mod composite;
 mod monomial;
 mod polynomial;
 mod integer_impl;
-#[cfg(test)]
-mod tests;
 
-pub use primitives::*;
+pub use primitives::Polynomial;
+pub use functions::*;
 pub use integer_impl::*;

@@ -1,6 +1,6 @@
 [package]
 name = "symints"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Aleksandzr Botev <botevmg@gmail.com>"]
 description = "A package for manipulation of polynomials over the integers."
 documentation = "http://botev.github.io/symbolic_polynomials/index.html"
@@ -10,8 +10,9 @@ readme = "README.md"
 keywords = ["math", "symbolic", "integers"]
 license = "Apache 2.0"
 
-[dependencies]
-num = "*"
+[dependencies.num]
+version = "*"
+default-features = false
 
 [lib]
 name = "symints"

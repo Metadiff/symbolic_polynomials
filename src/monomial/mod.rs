@@ -1,26 +1,21 @@
 use std::ops::{MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
-use std::result::Result;
-use std::fmt;
 use std::cmp::{Ord, Ordering};
-use std::convert::From;
-use std::collections::HashMap;
 use std::iter;
 
 use primitives::*;
-use num;
+use functions::*;
 
 impl<I, C, P> Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     pub fn up_to_coefficient(&self, other: &Monomial<I, C, P>) -> bool {
-        match self.powers.len() == other.powers.len() {
-            true => {
-                for (&(ref c, ref power), &(ref o_c, ref o_power)) in self.powers.iter().zip(other.powers.iter()) {
-                    if c != o_c || power != o_power {
-                        return false
-                    }
+        if self.powers.len() == other.powers.len() {
+            for (&(ref c, ref power), &(ref o_c, ref o_power)) in self.powers.iter().zip(other.powers.iter()) {
+                if c != o_c || power != o_power {
+                    return false
                 }
-                true
-            },
-            false => false
+            }
+            true
+        } else {
+            false
         }
     }
 }
@@ -32,17 +27,17 @@ impl<I, C, P> IsConstant for Monomial<I, C, P> where I:Id, C: Coefficient, P: Po
 }
 
 impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
+    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = self.coefficient.clone();
         for &(ref c, ref pow) in self.powers.iter(){
-            value *= num::pow(try!(c.evaluate(values)), pow.clone().into());
+            value *= ::num::pow(try!(c.evaluate(values)), pow.clone().into());
         }
         Ok(value)
     }
 }
 
-impl<I, C, P> fmt::Display for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl<I, C, P> ::std::fmt::Display for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         if self.coefficient == C::zero() {
             return write!(f, "0")
         } else if self.coefficient == C::one() && self.powers.len() == 0 {
@@ -65,8 +60,8 @@ impl<I, C, P> fmt::Display for Monomial<I, C, P> where I:Id, C: Coefficient, P: 
     }
 }
 
-impl<I, C, P> fmt::Debug for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+impl<I, C, P> ::std::fmt::Debug for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         if self.coefficient == C::zero() {
             return write!(f, "0")
         } else {
@@ -426,3 +421,6 @@ impl<'a, 'b, I, C, P> Sub<&'a Polynomial<I, C, P>> for &'b Monomial<I, C, P> whe
         result
     }
 }
+
+#[cfg(test)]
+mod tests;
