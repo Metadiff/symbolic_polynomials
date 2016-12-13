@@ -3,7 +3,7 @@ use std::cmp::{Ord, Ordering};
 use std::collections::HashMap;
 use primitives::*;
 
-impl<I, C> fmt::Display for Composite<I, C> where I: Id, C: Coefficient {
+impl<I, C, P> fmt::Display for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
@@ -26,7 +26,7 @@ impl<I, C> fmt::Display for Composite<I, C> where I: Id, C: Coefficient {
     }
 }
 
-impl<I, C> fmt::Debug for Composite<I, C> where I: Id, C: Coefficient {
+impl<I, C, P> fmt::Debug for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
@@ -49,14 +49,14 @@ impl<I, C> fmt::Debug for Composite<I, C> where I: Id, C: Coefficient {
     }
 }
 
-impl<I, C> PartialOrd for Composite<I, C> where I: Id, C: Coefficient {
-    fn partial_cmp(&self, other: &Composite<I, C>) -> Option<Ordering> {
+impl<I, C, P> PartialOrd for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn partial_cmp(&self, other: &Composite<I, C, P>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I, C> Ord for Composite<I, C> where I: Id, C: Coefficient {
-    fn cmp(&self, other: &Composite<I, C>) -> Ordering {
+impl<I, C, P> Ord for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
+    fn cmp(&self, other: &Composite<I, C, P>) -> Ordering {
         match self {
             &Composite::Variable(ref id) => {
                 match other {
@@ -115,7 +115,7 @@ impl<I, C> Ord for Composite<I, C> where I: Id, C: Coefficient {
     }
 }
 
-impl<I, C> Evaluable<I, C> for Composite<I, C> where I: Id, C: Coefficient {
+impl<I, C, P> Evaluable<I, C> for Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
     fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
         match self {
             &Composite::Variable(ref x) => {

@@ -5,15 +5,16 @@ use std::result::Result;
 use std::fmt;
 use std::rc::Rc;
 
-use num::{Integer, One};
+use num::{Integer, One, Zero};
 
 pub trait Id: Clone + Ord + Hash + VariableDisplay {}
 
 impl<T> Id for T where T: Clone + Ord + Hash + VariableDisplay {}
 
-pub trait Power: Clone + Ord + fmt::Display + fmt::Debug {}
+pub trait Power: Integer + One + Zero + Into<usize> + Clone + Ord + fmt::Display + fmt::Debug {}
 
-impl<T> Power for T where T: Clone + Ord + fmt::Display + fmt::Debug {}
+impl<T> Power for T where T:
+    Integer + One + Zero + Into<usize> + Clone + Ord + fmt::Display + fmt::Debug {}
 
 pub trait Coefficient: Integer + One +
     AddAssign<Self> + SubAssign<Self> + MulAssign<Self> + DivAssign<Self> + Neg<Output=Self> +
@@ -25,25 +26,25 @@ impl<T> Coefficient for T where T: Integer + One +
 
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
-pub struct Monomial<I, C> where I: Id, C: Coefficient {
+pub struct Monomial<I, C, P> where I: Id, C: Coefficient, P: Power {
     pub coefficient : C,
-    pub powers : Vec<(Composite<I, C>, u8)>
+    pub powers : Vec<(Composite<I, C, P>, P)>
 }
 
 #[derive(Clone, Default, Eq)]
 #[repr(C)]
-pub struct Polynomial<I, C> where I: Id, C: Coefficient {
-    pub monomials: Vec<Monomial<I, C>>
+pub struct Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
+    pub monomials: Vec<Monomial<I, C, P>>
 }
 
 #[derive(Clone, PartialEq, Eq)]
 #[repr(C)]
-pub enum Composite<I, C> where I: Id, C: Coefficient {
+pub enum Composite<I, C, P> where I: Id, C: Coefficient, P: Power {
     Variable(I),
-    Floor(Rc<Polynomial<I, C>>, Rc<Polynomial<I, C>>),
-    Ceil(Rc<Polynomial<I, C>>, Rc<Polynomial<I, C>>),
-    Min(Rc<Polynomial<I, C>>, Rc<Polynomial<I, C>>),
-    Max(Rc<Polynomial<I, C>>, Rc<Polynomial<I, C>>)
+    Floor(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Ceil(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Min(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Max(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>)
 }
 
 /// A common trait for expressions which can be evaluated.
@@ -59,7 +60,7 @@ pub enum Composite<I, C> where I: Id, C: Coefficient {
 /// ```
 /// # use symints::*;
 /// # use std::collections::HashMap;
-/// type SymInt = Polynomial<u16, i64>;
+/// type SymInt = Polynomial<u16, i64, u8>;
 /// let a: SymInt = primitive(0);
 /// let b: SymInt = primitive(1);
 /// let a_square_plus_b_plus_1 = &(&a * &a) + &(&b + 1);
@@ -78,7 +79,7 @@ pub trait Evaluable<I, C> where I: Id, C: Coefficient {
 /// # Examples
 /// ```
 /// # use symints::*;
-/// type SymInt = Polynomial<u16, i64>;
+/// type SymInt = Polynomial<u16, i64, u8>;
 /// let a: SymInt = primitive(0);
 /// let zero = &a - &a;
 /// assert!(!a.is_constant());
@@ -96,7 +97,7 @@ pub trait IsConstant {
 /// # Examples
 /// ```
 /// # use symints::*;
-/// type SymInt = Polynomial<u16, i64>;
+/// type SymInt = Polynomial<u16, i64, u8>;
 /// let a: SymInt = primitive(0);
 /// let b: SymInt = primitive(1);
 /// let a_plus_b = &a + &b;
@@ -115,18 +116,18 @@ pub trait VariableDisplay {
 
 /// Returns a symbolic integer expression representing
 /// the primitive variable `Composite::Variable(id)`.
-pub fn primitive<I, C>(id: I) -> Polynomial<I, C> where I: Id, C: Coefficient {
+pub fn primitive<I, C, P>(id: I) -> Polynomial<I, C, P> where I: Id, C: Coefficient, P: Power {
     Polynomial{
         monomials: vec![Monomial{
             coefficient: C::one(),
-            powers: vec![(Composite::Variable(id), 1)]
+            powers: vec![(Composite::Variable(id), P::one())]
         }]
     }
 }
 
 /// Computes a symbolic `max` between two symbolic integer expressions.
-pub fn max<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomial<I, C>
-    where I: Id, C: Coefficient {
+pub fn max<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).ok().unwrap();
         let v2 = right.evaluate(&HashMap::default()).ok().unwrap();
@@ -136,15 +137,15 @@ pub fn max<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomia
             monomials: vec![Monomial {
                 coefficient: C::one(),
                 powers: vec![(Composite::Max(Rc::new(left.clone()),
-                                             Rc::new(right.clone())), 1)]
+                                             Rc::new(right.clone())), P::one())]
             }]
         }
     }
 }
 
 /// Computes a symbolic `min` between two symbolic integer expressions.
-pub fn min<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomial<I, C>
-    where I: Id, C: Coefficient {
+pub fn min<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).ok().unwrap();
         let v2 = right.evaluate(&HashMap::default()).ok().unwrap();
@@ -154,15 +155,15 @@ pub fn min<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomia
             monomials: vec![Monomial {
                 coefficient: C::one(),
                 powers: vec![(Composite::Min(Rc::new(left.clone()),
-                                             Rc::new(right.clone())), 1)]
+                                             Rc::new(right.clone())), P::one())]
             }]
         }
     }
 }
 
 /// Computes a symbolic `ceil` between two symbolic integer expressions.
-pub fn ceil<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomial<I, C>
-    where I: Id, C: Coefficient {
+pub fn ceil<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).ok().unwrap();
         let v2 = right.evaluate(&HashMap::default()).ok().unwrap();
@@ -180,7 +181,7 @@ pub fn ceil<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomi
                 monomials: vec![Monomial {
                     coefficient: C::one(),
                     powers: vec![(Composite::Ceil(Rc::new(left.clone()),
-                                                  Rc::new(right.clone())), 1)]
+                                                  Rc::new(right.clone())), P::one())]
                 }]
             }
         }
@@ -188,8 +189,8 @@ pub fn ceil<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomi
 }
 
 /// Computes a symbolic `floor` between two symbolic integer expressions.
-pub fn floor<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynomial<I, C>
-    where I: Id, C: Coefficient {
+pub fn floor<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power {
     if left.is_constant() && right.is_constant() {
         let v1 = left.evaluate(&HashMap::default()).ok().unwrap();
         let v2 = right.evaluate(&HashMap::default()).ok().unwrap();
@@ -201,7 +202,7 @@ pub fn floor<I, C>(left: &Polynomial<I, C>, right: &Polynomial<I, C>) -> Polynom
                 monomials: vec![Monomial {
                     coefficient: C::one(),
                     powers: vec![(Composite::Floor(Rc::new(left.clone()),
-                                                   Rc::new(right.clone())), 1)]
+                                                   Rc::new(right.clone())), P::one())]
                 }]
             }
         }

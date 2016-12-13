@@ -9,11 +9,11 @@ use std::iter;
 use primitives::*;
 use num;
 
-impl<I, C> Monomial<I, C> where I:Id, C: Coefficient {
-    pub fn up_to_coefficient(&self, other: &Monomial<I, C>) -> bool {
+impl<I, C, P> Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    pub fn up_to_coefficient(&self, other: &Monomial<I, C, P>) -> bool {
         match self.powers.len() == other.powers.len() {
             true => {
-                for (&(ref c, power), &(ref o_c, o_power)) in self.powers.iter().zip(other.powers.iter()) {
+                for (&(ref c, ref power), &(ref o_c, ref o_power)) in self.powers.iter().zip(other.powers.iter()) {
                     if c != o_c || power != o_power {
                         return false
                     }
@@ -25,23 +25,23 @@ impl<I, C> Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<I, C> IsConstant for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> IsConstant for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn is_constant(&self) -> bool {
         self.powers.len() == 0
     }
 }
 
-impl<I, C> Evaluable<I, C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
         let mut value = self.coefficient.clone();
-        for &(ref c, pow) in self.powers.iter(){
-            value *= num::pow(try!(c.evaluate(values)), pow as usize);
+        for &(ref c, ref pow) in self.powers.iter(){
+            value *= num::pow(try!(c.evaluate(values)), pow.clone().into());
         }
         Ok(value)
     }
 }
 
-impl<I, C> fmt::Display for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> fmt::Display for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         if self.coefficient == C::zero() {
             return write!(f, "0")
@@ -54,18 +54,18 @@ impl<I, C> fmt::Display for Monomial<I, C> where I:Id, C: Coefficient {
                 try!(write!(f, "{}", self.coefficient.clone()))
             }
         }
-        for &(ref c, pow) in self.powers.iter() {
-            match pow {
-                0 => {},
-                1 => try!(write!(f, "{}", c)),
-                v => try!(write!(f, "{}^{}", c, v))
+        for &(ref c, ref pow) in self.powers.iter() {
+            if pow == &P::one() {
+                try!(write!(f, "{}", c))
+            } else if pow != &P::zero() {
+                try!(write!(f, "{}^{}", c, pow))
             }
         }
         Ok(())
     }
 }
 
-impl<I, C> fmt::Debug for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> fmt::Debug for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         if self.coefficient == C::zero() {
             return write!(f, "0")
@@ -76,30 +76,27 @@ impl<I, C> fmt::Debug for Monomial<I, C> where I:Id, C: Coefficient {
                 try!(write!(f, "{}", self.coefficient.clone()))
             }
         }
-        for &(ref c, pow) in self.powers.iter() {
-            match pow {
-                0 => {},
-                _ => {
-                    let str = format!("{:?}", c);
-                    let repeated = iter::repeat(str)
-                        .take(pow as usize)
-                        .collect::<Vec<String>>()
-                        .join("*");
-                    try!(write!(f, "*{}",  repeated))
-                }
+        for &(ref c, ref pow) in self.powers.iter() {
+            if pow != &P::zero() {
+                let str = format!("{:?}", c);
+                let repeated = iter::repeat(str)
+                    .take(pow.clone().into())
+                    .collect::<Vec<String>>()
+                    .join("*");
+                try!(write!(f, "*{}",  repeated))
             }
         }
         Ok(())
     }
 }
 
-impl<I, C> From<C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> From<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn from(other: C) -> Self{
         Monomial{coefficient: other, powers: Vec::new()}
     }
 }
 
-impl<I, C> PartialEq<C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> PartialEq<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn eq(&self, other: &C) -> bool {
         match self.coefficient == *other {
             true => self.is_constant(),
@@ -108,8 +105,8 @@ impl<I, C> PartialEq<C> for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<I, C> PartialEq for Monomial<I, C> where I:Id, C: Coefficient {
-    fn eq(&self, other: &Monomial<I, C>) -> bool {
+impl<I, C, P> PartialEq for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn eq(&self, other: &Monomial<I, C, P>) -> bool {
         match self.coefficient == other.coefficient {
             true => self.up_to_coefficient(other),
             false => false
@@ -117,13 +114,13 @@ impl<I, C> PartialEq for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<I, C> PartialEq<Polynomial<I, C>> for Monomial<I, C> where I:Id, C: Coefficient {
-    fn eq(&self, other: &Polynomial<I, C>) -> bool {
+impl<I, C, P> PartialEq<Polynomial<I, C, P>> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn eq(&self, other: &Polynomial<I, C, P>) -> bool {
         other.eq(self)
     }
 }
 
-impl<I, C> PartialOrd<C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> PartialOrd<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn partial_cmp(&self, other: &C) -> Option<Ordering> {
         if self.is_constant() {
             self.coefficient.partial_cmp(&other.clone().into())
@@ -133,14 +130,14 @@ impl<I, C> PartialOrd<C> for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<I, C> PartialOrd for Monomial<I, C> where I:Id, C: Coefficient {
-    fn partial_cmp(&self, other: &Monomial<I, C>) -> Option<Ordering> {
+impl<I, C, P> PartialOrd for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn partial_cmp(&self, other: &Monomial<I, C, P>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I, C> PartialOrd<Polynomial<I, C>> for Monomial<I, C> where I:Id, C: Coefficient {
-    fn partial_cmp(&self, other: &Polynomial<I, C>) -> Option<Ordering> {
+impl<I, C, P> PartialOrd<Polynomial<I, C, P>> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn partial_cmp(&self, other: &Polynomial<I, C, P>) -> Option<Ordering> {
         match other.partial_cmp(self) {
             Some(Ordering::Less) => Some(Ordering::Greater),
             Some(Ordering::Equal) => Some(Ordering::Equal),
@@ -150,8 +147,8 @@ impl<I, C> PartialOrd<Polynomial<I, C>> for Monomial<I, C> where I:Id, C: Coeffi
     }
 }
 
-impl<I, C> Ord for Monomial<I, C> where I:Id, C: Coefficient {
-    fn cmp(&self, other: &Monomial<I, C>) -> Ordering {
+impl<I, C, P> Ord for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn cmp(&self, other: &Monomial<I, C, P>) -> Ordering {
         let min = if self.powers.len() < other.powers.len() {self.powers.len()} else {other.powers.len()};
         for i in 0..min{
             match Ord::cmp(&self.powers[i].0, &other.powers[i].0){
@@ -169,14 +166,14 @@ impl<I, C> Ord for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<I, C> MulAssign<C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> MulAssign<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn mul_assign(&mut self, rhs: C){
         self.coefficient *= rhs;
     }
 }
 
-impl<'a, I, C> Mul<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
+impl<'a, I, C, P> Mul<C> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
     fn mul(self, rhs: C) -> Self::Output {
         let mut result = self.clone();
         result *= rhs;
@@ -184,8 +181,8 @@ impl<'a, I, C> Mul<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<'a, I, C> MulAssign<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: Coefficient {
-    fn mul_assign(&mut self, rhs: &'a Monomial<I, C>){
+impl<'a, I, C, P> MulAssign<&'a Monomial<I, C, P>> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn mul_assign(&mut self, rhs: &'a Monomial<I, C, P>){
         self.coefficient *= rhs.coefficient.clone();
         let mut i1 = 0;
         let mut i2 = 0;
@@ -197,7 +194,8 @@ impl<'a, I, C> MulAssign<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: C
                     i2 += 1;
                 }
                 Ordering::Equal => {
-                    self.powers[i1] = (self.powers[i1].0.clone(), self.powers[i1].1 + rhs.powers[i2].1);
+                    self.powers[i1] = (self.powers[i1].0.clone(),
+                                       self.powers[i1].1.clone() + rhs.powers[i2].1.clone());
                     i2 += 1;
                 }
             }
@@ -210,26 +208,26 @@ impl<'a, I, C> MulAssign<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: C
     }
 }
 
-impl<'a, 'b, I, C> Mul<&'a Monomial<I, C>> for &'b Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
-    fn mul(self, rhs: &'a Monomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Mul<&'a Monomial<I, C, P>> for &'b Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
+    fn mul(self, rhs: &'a Monomial<I, C, P>) -> Self::Output {
         let mut result = self.clone();
         result *= rhs;
         result
     }
 }
 
-impl<'a, 'b, I, C> Mul<&'a Polynomial<I, C>> for &'b Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
-    fn mul(self, rhs: &'a Polynomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Mul<&'a Polynomial<I, C, P>> for &'b Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn mul(self, rhs: &'a Polynomial<I, C, P>) -> Self::Output {
         let mut result = rhs.clone();
         result *= self;
         result
     }
 }
 
-impl<I, C> CheckedDiv<C> for Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
+impl<I, C, P> CheckedDiv<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
     fn checked_div(&self, other: C) -> Option<Self::Output> {
         let (d, rem) = self.coefficient.div_rem(&other);
         if rem == C::zero() {
@@ -243,14 +241,14 @@ impl<I, C> CheckedDiv<C> for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<'a, I, C> Div<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
+impl<'a, I, C, P> Div<C> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
     fn div(self, other: C) -> Self::Output {
         self.checked_div(other).unwrap()
     }
 }
 
-impl<I, C> DivAssign<C> for Monomial<I, C> where I:Id, C: Coefficient {
+impl<I, C, P> DivAssign<C> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
     fn div_assign(&mut self, rhs: C){
         let (d, rem) = self.coefficient.div_rem(&rhs);
         if rem == C::zero() {
@@ -261,9 +259,9 @@ impl<I, C> DivAssign<C> for Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<'a, I, C> CheckedDiv<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
-    fn checked_div(&self, rhs: &'a Monomial<I, C>) -> Option<Self::Output> {
+impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
+    fn checked_div(&self, rhs: &'a Monomial<I, C, P>) -> Option<Self::Output> {
         let (d, rem) = self.coefficient.div_rem(&rhs.coefficient);
         if rem == C::zero() {
             let mut result = Monomial{
@@ -280,7 +278,8 @@ impl<'a, I, C> CheckedDiv<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: 
                             Ordering::Less => return None,
                             Ordering::Equal => {result.powers.remove(i1); i2 += 1;},
                             Ordering::Greater => {
-                                result.powers[i1] = (result.powers[i1].0.clone(), result.powers[i1].1 - rhs.powers[i2].1);
+                                result.powers[i1] = (result.powers[i1].0.clone(),
+                                                     result.powers[i1].1.clone() - rhs.powers[i2].1.clone());
                                 i1 += 1;
                                 i2 += 1;
                             }
@@ -300,30 +299,30 @@ impl<'a, I, C> CheckedDiv<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: 
     }
 }
 
-impl<'a, 'b, I, C> Div<&'a Monomial<I, C>> for &'b Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
-    fn div(self, rhs: &'a Monomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Div<&'a Monomial<I, C, P>> for &'b Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
+    fn div(self, rhs: &'a Monomial<I, C, P>) -> Self::Output {
         self.checked_div(rhs).unwrap()
     }
 }
 
-impl<'a, I, C> DivAssign<&'a Monomial<I, C>> for Monomial<I, C> where I:Id, C: Coefficient {
-    fn div_assign(&mut self, rhs: &'a Monomial<I, C>){
-        let result = (self as &Monomial<I, C>).checked_div(rhs).unwrap();
+impl<'a, I, C, P> DivAssign<&'a Monomial<I, C, P>> for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    fn div_assign(&mut self, rhs: &'a Monomial<I, C, P>){
+        let result = (self as &Monomial<I, C, P>).checked_div(rhs).unwrap();
         self.coefficient = result.coefficient;
         self.powers = result.powers.clone();
     }
 }
 
-impl<'a, I, C> Neg for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Monomial<I, C>;
+impl<'a, I, C, P> Neg for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Monomial<I, C, P>;
     fn neg(self) -> Self::Output {
         Monomial{coefficient: - self.coefficient.clone(), powers: self.powers.clone()}
     }
 }
 
-impl<'a, I, C> Add<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
+impl<'a, I, C, P> Add<C> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
     fn add(self, rhs: C) -> Self::Output {
         if rhs == C::zero() {
             Polynomial{monomials: vec![self.clone()]}
@@ -341,9 +340,9 @@ impl<'a, I, C> Add<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<'a, 'b, I, C> Add<&'b Monomial<I, C>> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
-    fn add(self, rhs: &'b Monomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Add<&'b Monomial<I, C, P>> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn add(self, rhs: &'b Monomial<I, C, P>) -> Self::Output {
         if rhs.coefficient == C::zero() && self.coefficient == C::zero() {
             Polynomial{monomials: Vec::new()}
         } else if rhs.coefficient == C::zero() {
@@ -366,17 +365,17 @@ impl<'a, 'b, I, C> Add<&'b Monomial<I, C>> for &'a Monomial<I, C> where I:Id, C:
     }
 }
 
-impl<'a, 'b, I, C> Add<&'a Polynomial<I, C>> for &'b Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
-    fn add(self, rhs: &'a Polynomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Add<&'a Polynomial<I, C, P>> for &'b Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn add(self, rhs: &'a Polynomial<I, C, P>) -> Self::Output {
         let mut result = rhs.clone();
         result += self;
         result
     }
 }
 
-impl<'a, I, C> Sub<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
+impl<'a, I, C, P> Sub<C> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
     fn sub(self, rhs: C) -> Self::Output {
         if rhs == C::zero() {
             Polynomial{monomials: vec![self.clone()]}
@@ -394,9 +393,9 @@ impl<'a, I, C> Sub<C> for &'a Monomial<I, C> where I:Id, C: Coefficient {
     }
 }
 
-impl<'a, 'b, I, C> Sub<&'b Monomial<I, C>> for &'a Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
-    fn sub(self, rhs: &'b Monomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Sub<&'b Monomial<I, C, P>> for &'a Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn sub(self, rhs: &'b Monomial<I, C, P>) -> Self::Output {
         if self.coefficient == C::zero() && rhs.coefficient == C::zero() {
             Polynomial{monomials: Vec::new()}
         } else if rhs.coefficient == C::zero() {
@@ -419,9 +418,9 @@ impl<'a, 'b, I, C> Sub<&'b Monomial<I, C>> for &'a Monomial<I, C> where I:Id, C:
     }
 }
 
-impl<'a, 'b, I, C> Sub<&'a Polynomial<I, C>> for &'b Monomial<I, C> where I:Id, C: Coefficient {
-    type Output = Polynomial<I, C>;
-    fn sub(self, rhs: &'a Polynomial<I, C>) -> Self::Output {
+impl<'a, 'b, I, C, P> Sub<&'a Polynomial<I, C, P>> for &'b Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn sub(self, rhs: &'a Polynomial<I, C, P>) -> Self::Output {
         let mut result = -rhs;
         result += self;
         result
