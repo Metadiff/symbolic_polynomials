@@ -1,8 +1,8 @@
 #[warn(unused_imports)]
 use primitives::*;
 
-type TestMonomial = Monomial<u16>;
-type TestPolynomial = Polynomial<u16>;
+type TestMonomial = Monomial<u16, i64>;
+type TestPolynomial = Polynomial<u16, i64>;
 
 #[test]
 pub fn constructor() {

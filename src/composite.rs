@@ -3,7 +3,7 @@ use std::cmp::{Ord, Ordering};
 use std::collections::HashMap;
 use primitives::*;
 
-impl<I> fmt::Display for Composite<I> where I: Id {
+impl<I, C> fmt::Display for Composite<I, C> where I: Id, C: Coefficient {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
@@ -26,7 +26,7 @@ impl<I> fmt::Display for Composite<I> where I: Id {
     }
 }
 
-impl<I> fmt::Debug for Composite<I> where I: Id {
+impl<I, C> fmt::Debug for Composite<I, C> where I: Id, C: Coefficient {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         match self {
             &Composite::Variable(ref id) => {
@@ -49,14 +49,14 @@ impl<I> fmt::Debug for Composite<I> where I: Id {
     }
 }
 
-impl<I> PartialOrd for Composite<I> where I: Id {
-    fn partial_cmp(&self, other: &Composite<I>) -> Option<Ordering> {
+impl<I, C> PartialOrd for Composite<I, C> where I: Id, C: Coefficient {
+    fn partial_cmp(&self, other: &Composite<I, C>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<I> Ord for Composite<I> where I: Id {
-    fn cmp(&self, other: &Composite<I>) -> Ordering {
+impl<I, C> Ord for Composite<I, C> where I: Id, C: Coefficient {
+    fn cmp(&self, other: &Composite<I, C>) -> Ordering {
         match self {
             &Composite::Variable(ref id) => {
                 match other {
@@ -115,21 +115,21 @@ impl<I> Ord for Composite<I> where I: Id {
     }
 }
 
-impl<I> Evaluable<I> for Composite<I> where I: Id {
-    fn evaluate(&self, values: &HashMap<I, i64>) -> Result<i64, I> {
+impl<I, C> Evaluable<I, C> for Composite<I, C> where I: Id, C: Coefficient {
+    fn evaluate(&self, values: &HashMap<I, C>) -> Result<C, I> {
         match self {
             &Composite::Variable(ref x) => {
-                values.get(x).map(|&v| v).ok_or(x.clone())
+                values.get(x).map(|v| v.clone()).ok_or(x.clone())
             },
             &Composite::Floor(ref x, ref y) => {
-                let v_x = try!(x.evaluate(values)) as f64;
-                let v_y = try!(y.evaluate(values)) as f64;
-                Ok( (v_x / v_y).floor() as i64)
+                let v_x = try!(x.evaluate(values));
+                let v_y = try!(y.evaluate(values));
+                Ok( C::div_floor(&v_x, &v_y) )
             } ,
             &Composite::Ceil(ref x, ref y) => {
-                let v_x = try!(x.evaluate(values)) as f64;
-                let v_y = try!(y.evaluate(values)) as f64;
-                Ok( (v_x / v_y).ceil() as i64)
+                let v_x = try!(x.evaluate(values));
+                let v_y = try!(y.evaluate(values));
+                Ok( C::div_floor(&v_x, &v_y) )
             },
             &Composite::Min(ref x, ref y) => {
                 let v_x = try!(x.evaluate(values));

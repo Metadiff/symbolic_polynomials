@@ -10,6 +10,9 @@ readme = "README.md"
 keywords = ["math", "symbolic", "integers"]
 license = "Apache 2.0"
 
+[dependencies]
+num = "*"
+
 [lib]
 name = "symints"
 path = "src/lib.rs"

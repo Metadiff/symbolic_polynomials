@@ -2,12 +2,12 @@
 use primitives::*;
 use std::rc::Rc;
 
-type TestMonomial = Monomial<u16>;
-type TestPolynomial = Polynomial<u16>;
+type TestMonomial = Monomial<u16, i64>;
+type TestPolynomial = Polynomial<u16, i64>;
 
 #[test]
 pub fn constructor() {
-    let a = primitive::<u16>(0);
+    let a: TestPolynomial = primitive(0);
     let b_mon = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(1 as u16), 1)]};
     let b = TestPolynomial::from(&(5 * &b_mon));
@@ -39,10 +39,10 @@ pub fn constructor() {
 
 #[test]
 pub fn partial_eq_test() {
-    let a = ::primitive(0);
-    let b = ::primitive(1);
-    let a_v2 = ::primitive(0);
-    let b_v2 = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
+    let a_v2: TestPolynomial = primitive(0);
+    let b_v2: TestPolynomial = primitive(1);
     // ab
     let ab = &a * &b;
     // a + b
@@ -70,8 +70,8 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let a = ::primitive(0);
-    let b = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     // a^2
     let a_square = &a * &a;
     // b^2
@@ -114,8 +114,8 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let a = ::primitive(0);
-    let b = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -148,8 +148,8 @@ pub fn mul_test() {
 
 #[test]
 pub fn div_test() {
-    let a = ::primitive(0);
-    let b = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -170,8 +170,8 @@ pub fn div_test() {
 pub fn add_test() {
     let a_mon = TestMonomial{coefficient: 1,
         powers: vec![(Composite::Variable(0), 1)]};
-    let a = ::primitive(0);
-    let b = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     // a + b + 1
     let a_plus_b_plus_1_v1 = &(&a + &b) + 1;
     let a_plus_b_plus_1_v2 = &(&a_mon + &b) + 1;
@@ -203,8 +203,8 @@ pub fn add_test() {
 
 #[test]
 pub fn sub_test() {
-    let a = ::primitive(0);
-    let b = ::primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     // a + b + 1
     let a_plus_b_plus_1 = &(&a + &b) + 1;
     // 2a + 2b + 2
@@ -227,8 +227,8 @@ pub fn max_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let thirteen_v2 = max(&thirteen, &three);
-    let a = primitive(0);
-    let b = primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     let a_square = &a * &a;
     let a_v2 = max(&a_square, &a);
     let a_square_ceil_b = max(&a_square, &b);
@@ -249,8 +249,8 @@ pub fn min_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let three_v2 = min(&thirteen, &three);
-    let a = primitive(0);
-    let b = primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     let a_square = &a * &a;
     let a_v2 = min(&a_square, &a);
     let a_square_ceil_b = min(&a_square, &b);
@@ -271,8 +271,8 @@ pub fn ceil_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let five = ceil(&thirteen, &three);
-    let a = primitive(0);
-    let b = primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     let a_square = &a * &a;
     let a_v2 = ceil(&a_square, &a);
     let a_square_ceil_b = ceil(&a_square, &b);
@@ -291,8 +291,8 @@ pub fn floor_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let four = floor(&thirteen, &three);
-    let a = primitive(0);
-    let b = primitive(1);
+    let a: TestPolynomial = primitive(0);
+    let b: TestPolynomial = primitive(1);
     let a_square = &a * &a;
     let a_v2 = floor(&a_square, &a);
     let a_square_floor_b = floor(&a_square, &b);
