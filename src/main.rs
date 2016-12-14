@@ -2,15 +2,32 @@ use std::collections::HashMap;
 
 extern crate symints;
 use symints::*;
-type SymInt = Polynomial<u16, i64, u8>;
 
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct VarId {
+    pub id: u8,
+}
+
+impl From<u8> for VarId {
+    fn from(other: u8) -> Self {
+        VarId { id: other }
+    }
+}
+
+impl VariableDisplay for VarId {
+    fn var_fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+        write!(f, "{}", (self.id + 'a' as u8) as char)
+    }
+}
+
+type SymInt = Polynomial<VarId, i64, u8>;
 
 type Shape = (SymInt, SymInt, SymInt, SymInt);
 
-enum ConvolutionMode{
-    VALID,
-    HALF,
-    FULL
+enum ConvolutionMode {
+    Valid,
+    Half,
+    Full,
 }
 
 fn is_2d(shape: &Shape) -> bool {
@@ -35,46 +52,37 @@ fn element_wise_shape(left: &Shape, right: &Shape) -> Option<Shape> {
     }
 }
 
-fn convolution_2d_shape(image: &Shape, kernel: &Shape, stride: &Shape,
-                        mode: ConvolutionMode) -> Option<Shape> {
+fn convolution_2d_shape(image: &Shape, kernel: &Shape, stride: &Shape, mode: ConvolutionMode) -> Option<Shape> {
     // Check everything is 2D
     if is_2d(image) && is_2d(kernel) && is_2d(stride) {
-        let (padding0, padding1) : (SymInt, SymInt) = match mode {
-            ConvolutionMode::VALID => {
-                (0.into(), 0.into())
-            },
-            ConvolutionMode::HALF => {
-                (floor(&kernel.0, &2.into()), floor(&kernel.1, &2.into()))
-            }
-            ConvolutionMode::FULL => {
-                (&kernel.0 - 1, &kernel.1 - 1)
-            }
+        let (padding0, padding1): (SymInt, SymInt) = match mode {
+            ConvolutionMode::Valid => (0.into(), 0.into()),
+            ConvolutionMode::Half => (floor(&kernel.0, &2.into()), floor(&kernel.1, &2.into())),
+            ConvolutionMode::Full => (&kernel.0 - 1, &kernel.1 - 1),
         };
         Some((ceil(&(&(&image.0 - &kernel.0) + &(2 * &padding0)), &stride.0),
-             ceil(&(&(&image.1 - &kernel.1) + &(2 * &padding1)), &stride.1),
-             1.into(), 1.into()))
+              ceil(&(&(&image.1 - &kernel.1) + &(2 * &padding1)), &stride.1),
+              1.into(),
+              1.into()))
     } else {
         None
     }
 }
 
-fn eval_shape(shape: &Shape, values: &HashMap<u16, i64>) -> Result<(i64, i64, i64, i64), u16> {
-    Ok((try!(shape.0.evaluate(values)),
-    try!(shape.1.evaluate(values)),
-    try!(shape.2.evaluate(values)),
-    try!(shape.3.evaluate(values))))
+fn eval_shape(shape: &Shape, values: &HashMap<VarId, i64>) -> Result<(i64, i64, i64, i64), VarId> {
+    Ok((shape.0.evaluate(values)?, shape.1.evaluate(values)?, shape.2.evaluate(values)?, shape.3.evaluate(values)?))
 }
 
-fn main(){
-    let a = primitive(0);
-    let b = primitive(1);
-    let c = primitive(2);
-    let d = primitive(3);
-    let mut values: HashMap<u16, i64> = HashMap::new();
-    values.insert(0, 20);
-    values.insert(1, 7);
-    values.insert(2, 10);
-    values.insert(3, 3);
+fn main() {
+    let a = primitive(0.into());
+    let b = primitive(1.into());
+    let c = primitive(2.into());
+    let d = primitive(3.into());
+    let mut values: HashMap<VarId, i64> = HashMap::new();
+    values.insert(0.into(), 20);
+    values.insert(1.into(), 7);
+    values.insert(2.into(), 10);
+    values.insert(3.into(), 3);
     let mut temp: Shape;
     let s1: Shape = (a.clone(), b.clone(), 1.into(), 1.into());
     let s2: Shape = (b.clone(), c.clone(), 1.into(), 1.into());
@@ -83,20 +91,20 @@ fn main(){
     let ker: Shape = (d.clone(), d.clone(), 1.into(), 1.into());
     let st: Shape = (2.into(), 2.into(), 1.into(), 1.into());
     temp = matrix_mul_shape(&s1, &s2).unwrap();
-    println!("{:?}", temp);
+    println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
     println!("{:?}", eval_shape(&temp, &values));
     println!("{:?}", matrix_mul_shape(&s1, &s1));
     temp = element_wise_shape(&s1, &s3).unwrap();
-    println!("{:?}", temp);
+    println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
     println!("{:?}", eval_shape(&temp, &values));
     println!("{:?}", element_wise_shape(&s1, &s2));
-    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::VALID).unwrap();
-    println!("{:?}", temp);
+    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Valid).unwrap();
+    println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
     println!("{:?}", eval_shape(&temp, &values));
-    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::HALF).unwrap();
-    println!("{:?}", temp);
+    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Half).unwrap();
+    println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
     println!("{:?}", eval_shape(&temp, &values));
-    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::FULL).unwrap();
-    println!("{:?}", temp);
+    temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Full).unwrap();
+    println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
     println!("{:?}", eval_shape(&temp, &values));
 }
