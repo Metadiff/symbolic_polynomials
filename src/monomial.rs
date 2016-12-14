@@ -33,7 +33,7 @@ impl<I, C, P> Monomial<I, C, P>
         self.powers.is_empty()
     }
 
-    /// Evaluates the `Monomial` given the primitive variables assignment in `values`.
+    /// Evaluates the monomial given the primitive variables assignment in `values`.
     pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = self.coefficient.clone();
         for &(ref c, ref pow) in &self.powers {

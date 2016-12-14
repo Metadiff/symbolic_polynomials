@@ -3,26 +3,7 @@ use std::collections::HashMap;
 extern crate symints;
 use symints::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct VarId {
-    pub id: u8,
-}
-
-impl From<u8> for VarId {
-    fn from(other: u8) -> Self {
-        VarId { id: other }
-    }
-}
-
-impl ::std::fmt::Display for VarId {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-        write!(f, "{}", (self.id + 'a' as u8) as char)
-    }
-}
-
-impl VariableDisplay for VarId {}
-
-type SymInt = Polynomial<VarId, i64, u8>;
+type SymInt = Polynomial<String, i64, u8>;
 
 type Shape = (SymInt, SymInt, SymInt, SymInt);
 
@@ -71,20 +52,20 @@ fn convolution_2d_shape(image: &Shape, kernel: &Shape, stride: &Shape, mode: Con
     }
 }
 
-fn eval_shape(shape: &Shape, values: &HashMap<VarId, i64>) -> Result<(i64, i64, i64, i64), VarId> {
+fn eval_shape(shape: &Shape, values: &HashMap<String, i64>) -> Result<(i64, i64, i64, i64), String> {
     Ok((shape.0.evaluate(values)?, shape.1.evaluate(values)?, shape.2.evaluate(values)?, shape.3.evaluate(values)?))
 }
 
 fn main() {
-    let a = primitive(0.into());
-    let b = primitive(1.into());
-    let c = primitive(2.into());
-    let d = primitive(3.into());
-    let mut values: HashMap<VarId, i64> = HashMap::new();
-    values.insert(0.into(), 20);
-    values.insert(1.into(), 7);
-    values.insert(2.into(), 10);
-    values.insert(3.into(), 3);
+    let a = primitive("a".into());
+    let b = primitive("b".into());
+    let c = primitive("c".into());
+    let d = primitive("d".into());
+    let mut values: HashMap<String, i64> = HashMap::new();
+    values.insert("a".into(), 20);
+    values.insert("b".into(), 7);
+    values.insert("c".into(), 10);
+    values.insert("d".into(), 3);
     let mut temp: Shape;
     let s1: Shape = (a.clone(), b.clone(), 1.into(), 1.into());
     let s2: Shape = (b.clone(), c.clone(), 1.into(), 1.into());

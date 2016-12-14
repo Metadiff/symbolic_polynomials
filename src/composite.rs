@@ -53,7 +53,7 @@ impl<I, C, P> ::std::fmt::Display for Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         match *self {
-            Composite::Variable(ref id) => id.var_fmt(f),
+            Composite::Variable(ref id) => write!(f, "'{}'", id),
             Composite::Floor(ref x, ref y) => write!(f, "floor({}, {})", x, y),
             Composite::Ceil(ref x, ref y) => write!(f, "ceil({}, {})", x, y),
             Composite::Min(ref x, ref y) => write!(f, "min({}, {})", x, y),

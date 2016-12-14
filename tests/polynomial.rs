@@ -3,34 +3,15 @@ use std::rc::Rc;
 extern crate symints;
 use symints::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct VarId {
-    pub id: u8,
-}
-
-impl From<u8> for VarId {
-    fn from(other: u8) -> Self {
-        VarId { id: other }
-    }
-}
-
-impl ::std::fmt::Display for VarId {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-        write!(f, "{}", (self.id + 'a' as u8) as char)
-    }
-}
-
-impl VariableDisplay for VarId {}
-
-type TestMonomial = Monomial<VarId, i64, u8>;
-type TestPolynomial = Polynomial<VarId, i64, u8>;
+type TestMonomial = Monomial<String, i64, u8>;
+type TestPolynomial = Polynomial<String, i64, u8>;
 
 #[test]
 pub fn constructor() {
-    let a: TestPolynomial = primitive(0.into());
+    let a: TestPolynomial = primitive("a".into());
     let b_mon = TestMonomial {
         coefficient: 1,
-        powers: vec![(Composite::Variable(1.into()), 1)],
+        powers: vec![(Composite::Variable("b".into()), 1)],
     };
     let b = TestPolynomial::from(&(5 * &b_mon));
     let minus_six = TestPolynomial::from(-6);
@@ -49,20 +30,20 @@ pub fn constructor() {
     assert!(!a.is_constant());
     assert!(a.monomials.len() == 1);
     assert!(a.monomials[0].coefficient == 1);
-    assert!(a.monomials[0].powers == vec![(Composite::Variable(0.into()), 1)]);
+    assert!(a.monomials[0].powers == vec![(Composite::Variable("a".into()), 1)]);
 
     assert!(!b.is_constant());
     assert!(b.monomials.len() == 1);
     assert!(b.monomials[0].coefficient == 5);
-    assert!(b.monomials[0].powers == vec![(Composite::Variable(1.into()), 1)]);
+    assert!(b.monomials[0].powers == vec![(Composite::Variable("b".into()), 1)]);
 }
 
 #[test]
 pub fn partial_eq_test() {
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
-    let a_v2: TestPolynomial = primitive(0.into());
-    let b_v2: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
+    let a_v2: TestPolynomial = primitive("a".into());
+    let b_v2: TestPolynomial = primitive("b".into());
     // ab
     let ab = &a * &b;
     // a + b
@@ -90,8 +71,8 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     // a^2
     let a_square = &a * &a;
     // b^2
@@ -134,8 +115,8 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -146,28 +127,28 @@ pub fn mul_test() {
     assert!(product.monomials.len() == 7);
     assert!(product.monomials[0].coefficient == 1);
     assert!(product.monomials[0].powers ==
-            vec![(Composite::Variable(0.into()), 3), (Composite::Variable(1.into()), 1)]);
+            vec![(Composite::Variable("a".into()), 3), (Composite::Variable("b".into()), 1)]);
     assert!(product.monomials[1].coefficient == 2);
     assert!(product.monomials[1].powers ==
-            vec![(Composite::Variable(0.into()), 2), (Composite::Variable(1.into()), 2)]);
+            vec![(Composite::Variable("a".into()), 2), (Composite::Variable("b".into()), 2)]);
     assert!(product.monomials[2].coefficient == 2);
-    assert!(product.monomials[2].powers == vec![(Composite::Variable(0.into()), 2)]);
+    assert!(product.monomials[2].powers == vec![(Composite::Variable("a".into()), 2)]);
     assert!(product.monomials[3].coefficient == 1);
     assert!(product.monomials[3].powers ==
-            vec![(Composite::Variable(0.into()), 1), (Composite::Variable(1.into()), 3)]);
+            vec![(Composite::Variable("a".into()), 1), (Composite::Variable("b".into()), 3)]);
     assert!(product.monomials[4].coefficient == 3);
     assert!(product.monomials[4].powers ==
-            vec![(Composite::Variable(0.into()), 1), (Composite::Variable(1.into()), 1)]);
+            vec![(Composite::Variable("a".into()), 1), (Composite::Variable("b".into()), 1)]);
     assert!(product.monomials[5].coefficient == 1);
-    assert!(product.monomials[5].powers == vec![(Composite::Variable(1.into()), 2)]);
+    assert!(product.monomials[5].powers == vec![(Composite::Variable("b".into()), 2)]);
     assert!(product.monomials[6].coefficient == 2);
     assert!(product.monomials[6].powers.len() == 0);
 }
 
 #[test]
 pub fn div_test() {
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -192,10 +173,10 @@ pub fn div_test() {
 pub fn add_test() {
     let a_mon = TestMonomial {
         coefficient: 1,
-        powers: vec![(Composite::Variable(0.into()), 1)],
+        powers: vec![(Composite::Variable("a".into()), 1)],
     };
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     // a + b + 1
     let a_plus_b_plus_1_v1 = &(&a + &b) + 1;
     let a_plus_b_plus_1_v2 = &(&a_mon + &b) + 1;
@@ -204,26 +185,26 @@ pub fn add_test() {
 
     assert!(a_plus_b_plus_1_v1.monomials.len() == 3);
     assert!(a_plus_b_plus_1_v1.monomials[0].coefficient == 1);
-    assert!(a_plus_b_plus_1_v1.monomials[0].powers == vec![(Composite::Variable(0.into()), 1)]);
+    assert!(a_plus_b_plus_1_v1.monomials[0].powers == vec![(Composite::Variable("a".into()), 1)]);
     assert!(a_plus_b_plus_1_v1.monomials[1].coefficient == 1);
-    assert!(a_plus_b_plus_1_v1.monomials[1].powers == vec![(Composite::Variable(1.into()), 1)]);
+    assert!(a_plus_b_plus_1_v1.monomials[1].powers == vec![(Composite::Variable("b".into()), 1)]);
     assert!(a_plus_b_plus_1_v1.monomials[2].coefficient == 1);
     assert!(a_plus_b_plus_1_v1.monomials[2].powers.len() == 0);
     assert!(a_plus_b_plus_1_v1 == a_plus_b_plus_1_v2);
 
     assert!(a_plus_b_plus_1_times_2.monomials.len() == 3);
     assert!(a_plus_b_plus_1_times_2.monomials[0].coefficient == 2);
-    assert!(a_plus_b_plus_1_times_2.monomials[0].powers == vec![(Composite::Variable(0.into()), 1)]);
+    assert!(a_plus_b_plus_1_times_2.monomials[0].powers == vec![(Composite::Variable("a".into()), 1)]);
     assert!(a_plus_b_plus_1_times_2.monomials[1].coefficient == 2);
-    assert!(a_plus_b_plus_1_times_2.monomials[1].powers == vec![(Composite::Variable(1.into()), 1)]);
+    assert!(a_plus_b_plus_1_times_2.monomials[1].powers == vec![(Composite::Variable("b".into()), 1)]);
     assert!(a_plus_b_plus_1_times_2.monomials[2].coefficient == 2);
     assert!(a_plus_b_plus_1_times_2.monomials[2].powers.len() == 0);
 }
 
 #[test]
 pub fn sub_test() {
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     // a + b + 1
     let a_plus_b_plus_1 = &(&a + &b) + 1;
     // 2a + 2b + 2
@@ -246,8 +227,8 @@ pub fn max_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let thirteen_v2 = max(&thirteen, &three);
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     let a_square = &a * &a;
     let a_v2 = max(&a_square, &a);
     let a_square_ceil_b = max(&a_square, &b);
@@ -266,8 +247,8 @@ pub fn min_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let three_v2 = min(&thirteen, &three);
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     let a_square = &a * &a;
     let a_v2 = min(&a_square, &a);
     let a_square_ceil_b = min(&a_square, &b);
@@ -286,8 +267,8 @@ pub fn ceil_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let five = ceil(&thirteen, &three);
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     let a_square = &a * &a;
     let a_v2 = ceil(&a_square, &a);
     let a_square_ceil_b = ceil(&a_square, &b);
@@ -305,8 +286,8 @@ pub fn floor_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let four = floor(&thirteen, &three);
-    let a: TestPolynomial = primitive(0.into());
-    let b: TestPolynomial = primitive(1.into());
+    let a: TestPolynomial = primitive("a".into());
+    let b: TestPolynomial = primitive("b".into());
     let a_square = &a * &a;
     let a_v2 = floor(&a_square, &a);
     let a_square_floor_b = floor(&a_square, &b);

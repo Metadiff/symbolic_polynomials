@@ -21,13 +21,42 @@ impl<I, C, P> Polynomial<I, C, P>
         }
     }
 
-    /// Evaluates the `Polynomial` given the primitive variables assignment in `values`.
+    /// Evaluates the polynomial given the primitive variables assignment in `values`.
     pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = C::zero();
         for m in &self.monomials {
             value += m.evaluate(values)?;
         }
         Ok(value)
+    }
+
+    /// Returns the result of the polynomial division with `rhs` as well as the reminder.
+    /// Note that this division depends on the ordering of the primitive variables type `I`
+    /// as explained in [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Reduction).
+    pub fn div_rem(&self, rhs: &Polynomial<I, C, P>) -> (Polynomial<I, C, P>, Polynomial<I, C, P>) {
+        let mut result = Polynomial { monomials: Vec::new() };
+        let mut reminder = self.clone();
+        while !reminder.monomials.is_empty() {
+            match (reminder.monomials[0]).checked_div(&rhs.monomials[0]) {
+                Some(ref x) => {
+                    result += x;
+                    reminder -= &(rhs * x);
+                }
+                None => return (result, reminder),
+            }
+        }
+        (result, reminder)
+    }
+
+    /// If the the polynomial is divisible by `rhs` than returns the result
+    /// of that division, otherwise None.
+    pub fn checked_div(&self, rhs: &Polynomial<I, C, P>) -> Option<Polynomial<I, C, P>> {
+        let (result, reminder) = self.div_rem(rhs);
+        if reminder.monomials.is_empty() {
+            Some(result)
+        } else {
+            None
+        }
     }
 }
 
@@ -337,37 +366,10 @@ impl<'a, I, C, P> DivAssign<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
 // impl<'a, I, C, P> CheckedDiv<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
 //    where I: Id, C: Coefficient, P: Power {
 //    type Output = Polynomial<I, C, P>;
-impl<I, C, P> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    /// Returns the result of the polynomial division with `rhs` as well as the reminder.
-    /// Note that this division depends on the ordering of the primitive variables `Id`
-    /// as explained in [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Reduction).
-    pub fn div_rem(&self, rhs: &Polynomial<I, C, P>) -> (Polynomial<I, C, P>, Polynomial<I, C, P>) {
-        let mut result = Polynomial { monomials: Vec::new() };
-        let mut reminder = self.clone();
-        while !reminder.monomials.is_empty() {
-            match (reminder.monomials[0]).checked_div(&rhs.monomials[0]) {
-                Some(ref x) => {
-                    result += x;
-                    reminder -= &(rhs * x);
-                }
-                None => return (result, reminder),
-            }
-        }
-        (result, reminder)
-    }
-
-    /// If the the polynomial is divisible by `rhs` than returns the result
-    /// of that division, otherwise None.
-    pub fn checked_div(&self, rhs: &Polynomial<I, C, P>) -> Option<Polynomial<I, C, P>> {
-        let (result, reminder) = self.div_rem(rhs);
-        if reminder.monomials.is_empty() {
-            Some(result)
-        } else {
-            None
-        }
-    }
-}
+// impl<I, C, P> Polynomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//
+//
 
 impl<'a, 'b, I, C, P> Div<&'a Polynomial<I, C, P>> for &'b Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
