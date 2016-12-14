@@ -2,7 +2,7 @@
 #skip_children = false                       # Don't reformat out of line modules
 
 max_width = 120                             # (100) Maximum width of each line
-#ideal_width = 100                           # (80) Ideal width of each line
+ideal_width = 100                           # (80) Ideal width of each line
 tab_spaces = 4                              # Number of spaces per tab
 fn_call_width = 100                         # (60) Maximum width of the args of a function call before falling back to vertical formatting
 struct_lit_width = 16                       # Maximum width in the body of a struct lit before falling back to vertical formatting
@@ -12,7 +12,7 @@ fn_brace_style = "PreferSameLine"            # [AlwaysNextLine|PreferSameLine|Sa
 item_brace_style = "PreferSameLine"          # [AlwaysNextLine|PreferSameLine|SameLineWhere] Brace style for structs and enums
 impl_empty_single_line = true               # Put empty-body implementations on a single line
 fn_empty_single_line = true                 # Put empty-body functions on a single line
-#fn_single_line = false                      # (false) Put single-expression functions on a single line
+fn_single_line = false                      # (false) Put single-expression functions on a single line
 fn_return_indent = "WithArgs"               # [WithArgs|WithWhereClause] Location of return type in function declaration
 #fn_args_paren_newline = true                # If function argument parenthesis goes on a newline
 fn_args_density = "Compressed"              # (Tall) [Compressed|Tall|CompressedIfEmpty] Argument density in functions

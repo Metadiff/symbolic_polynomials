@@ -1,9 +1,9 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::Ordering;
 
+use traits::*;
 use monomial::Monomial;
 use polynomial::Polynomial;
-use functions::*;
 
 impl<I, P> PartialEq<Monomial<I, i64, P>> for i64
     where I: Id, P: Power {

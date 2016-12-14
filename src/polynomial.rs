@@ -1,8 +1,8 @@
 use std::ops::{AddAssign, SubAssign, MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
 use std::cmp::{Ord, Ordering};
 
+use traits::*;
 use monomial::Monomial;
-use functions::*;
 
 #[derive(Clone, Default, Debug, Eq)]
 pub struct Polynomial<I, C, P>
@@ -10,20 +10,19 @@ pub struct Polynomial<I, C, P>
     pub monomials: Vec<Monomial<I, C, P>>,
 }
 
-impl<I, C, P> IsConstant for Polynomial<I, C, P>
+impl<I, C, P> Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    fn is_constant(&self) -> bool {
+    /// Returns `true` if the polynomial does not depend on any variables.
+    pub fn is_constant(&self) -> bool {
         match self.monomials.len() {
             0 => true,
             1 => self.monomials[0].is_constant(),
             _ => false
         }
     }
-}
 
-impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+    /// Evaluates the `Polynomial` given the primitive variables assignment in `values`.
+    pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = C::zero();
         for m in &self.monomials {
             value += m.evaluate(values)?;
@@ -31,6 +30,17 @@ impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P>
         Ok(value)
     }
 }
+
+// impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+//        let mut value = C::zero();
+//        for m in &self.monomials {
+//            value += m.evaluate(values)?;
+//        }
+//        Ok(value)
+//    }
+//
 
 impl<I, C, P> ::std::fmt::Display for Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
@@ -250,30 +260,33 @@ impl<'a, 'b, I, C, P> Mul<&'a Polynomial<I, C, P>> for &'b Polynomial<I, C, P>
     }
 }
 
-impl<I, C, P> CheckedDiv<C> for Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    type Output = Polynomial<I, C, P>;
-    fn checked_div(&self, rhs: C) -> Option<Self::Output> {
-        let result = Polynomial {
-            monomials: self.monomials
-                .iter()
-                .cloned()
-                .filter_map(|ref m| m.checked_div(rhs.clone()))
-                .collect(),
-        };
-        if result.monomials.len() != self.monomials.len() {
-            None
-        } else {
-            Some(result)
-        }
-    }
-}
+// impl<I, C, P> CheckedDiv<C> for Polynomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    type Output = Polynomial<I, C, P>;
+//    fn checked_div(&self, rhs: C) -> Option<Self::Output> {
+//        let result = Polynomial {
+//            monomials: self.monomials
+//                .iter()
+//                .cloned()
+//                .filter_map(|ref m| m.checked_div(rhs.clone()))
+//                .collect(),
+//        };
+//        if result.monomials.len() != self.monomials.len() {
+//            None
+//        } else {
+//            Some(result)
+//        }
+//    }
+//
 
 impl<'a, I, C, P> Div<C> for &'a Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     type Output = Polynomial<I, C, P>;
     fn div(self, rhs: C) -> Self::Output {
-        self.checked_div(rhs).unwrap()
+        match self.checked_div(&rhs.clone().into()) {
+            Some(result) => result,
+            None => panic!("Trying to divide {} by {} which is not possible.", self, rhs),
+        }
     }
 }
 
@@ -284,30 +297,33 @@ impl<I, C, P> DivAssign<C> for Polynomial<I, C, P>
     }
 }
 
-impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    type Output = Polynomial<I, C, P>;
-    fn checked_div(&self, rhs: &'a Monomial<I, C, P>) -> Option<Self::Output> {
-        let result = Polynomial {
-            monomials: self.monomials
-                .iter()
-                .cloned()
-                .filter_map(|ref m| m.checked_div(rhs))
-                .collect(),
-        };
-        if result.monomials.len() != self.monomials.len() {
-            None
-        } else {
-            Some(result)
-        }
-    }
-}
+// impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    type Output = Polynomial<I, C, P>;
+//    fn checked_div(&self, rhs: &'a Monomial<I, C, P>) -> Option<Self::Output> {
+//        let result = Polynomial {
+//            monomials: self.monomials
+//                .iter()
+//                .cloned()
+//                .filter_map(|ref m| m.checked_div(rhs))
+//                .collect(),
+//        };
+//        if result.monomials.len() != self.monomials.len() {
+//            None
+//        } else {
+//            Some(result)
+//        }
+//    }
+//
 
 impl<'a, 'b, I, C, P> Div<&'a Monomial<I, C, P>> for &'b Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     type Output = Polynomial<I, C, P>;
     fn div(self, rhs: &'a Monomial<I, C, P>) -> Self::Output {
-        self.checked_div(rhs).unwrap()
+        match self.checked_div(&rhs.into()) {
+            Some(result) => result,
+            None => panic!("Trying to divide {} by {} which is not possible.", self, rhs),
+        }
     }
 }
 
@@ -318,25 +334,37 @@ impl<'a, I, C, P> DivAssign<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
     }
 }
 
-impl<'a, I, C, P> CheckedDiv<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
+// impl<'a, I, C, P> CheckedDiv<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    type Output = Polynomial<I, C, P>;
+impl<I, C, P> Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    type Output = Polynomial<I, C, P>;
-    fn checked_div(&self, rhs: &'a Polynomial<I, C, P>) -> Option<Self::Output> {
+    /// Returns the result of the polynomial division with `rhs` as well as the reminder.
+    /// Note that this division depends on the ordering of the primitive variables `Id`
+    /// as explained in [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Reduction).
+    pub fn div_rem(&self, rhs: &Polynomial<I, C, P>) -> (Polynomial<I, C, P>, Polynomial<I, C, P>) {
         let mut result = Polynomial { monomials: Vec::new() };
         let mut reminder = self.clone();
-        while !reminder.is_constant() {
+        while !reminder.monomials.is_empty() {
             match (reminder.monomials[0]).checked_div(&rhs.monomials[0]) {
                 Some(ref x) => {
                     result += x;
                     reminder -= &(rhs * x);
                 }
-                None => return None,
+                None => return (result, reminder),
             }
         }
-        if !reminder.monomials.is_empty() {
-            None
-        } else {
+        (result, reminder)
+    }
+
+    /// If the the polynomial is divisible by `rhs` than returns the result
+    /// of that division, otherwise None.
+    pub fn checked_div(&self, rhs: &Polynomial<I, C, P>) -> Option<Polynomial<I, C, P>> {
+        let (result, reminder) = self.div_rem(rhs);
+        if reminder.monomials.is_empty() {
             Some(result)
+        } else {
+            None
         }
     }
 }
@@ -345,7 +373,10 @@ impl<'a, 'b, I, C, P> Div<&'a Polynomial<I, C, P>> for &'b Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     type Output = Polynomial<I, C, P>;
     fn div(self, rhs: &'a Polynomial<I, C, P>) -> Self::Output {
-        self.checked_div(rhs).unwrap()
+        match self.checked_div(rhs) {
+            Some(result) => result,
+            None => panic!("Trying to divide {} by {} which is not possible.", self, rhs),
+        }
     }
 }
 

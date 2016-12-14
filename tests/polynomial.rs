@@ -5,20 +5,22 @@ use symints::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct VarId {
-    pub id: u16,
+    pub id: u8,
 }
 
-impl From<u16> for VarId {
-    fn from(other: u16) -> Self {
+impl From<u8> for VarId {
+    fn from(other: u8) -> Self {
         VarId { id: other }
     }
 }
 
-impl VariableDisplay for VarId {
-    fn var_fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-        write!(f, "{}", (self.id as u8 + ('a' as u8)) as char)
+impl ::std::fmt::Display for VarId {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+        write!(f, "{}", (self.id + 'a' as u8) as char)
     }
 }
+
+impl VariableDisplay for VarId {}
 
 type TestMonomial = Monomial<VarId, i64, u8>;
 type TestPolynomial = Polynomial<VarId, i64, u8>;
@@ -172,14 +174,18 @@ pub fn div_test() {
     let ab_plus_b_square_plus_two = &(&(&a * &b) + &(&b * &b)) + 2;
     // a^3b + 2a^2b^2 + 2a^2 + ab^3 + 3ab + b^2 + 2
     let product = &ab_plus_a_square_plus_one * &ab_plus_b_square_plus_two;
+    // (ab + a^2 + 1) = a * (a + b) + 1
+    let (a_plus_b, one) = ab_plus_a_square_plus_one.div_rem(&a);
 
     assert!(&product / &ab_plus_a_square_plus_one == ab_plus_b_square_plus_two);
     assert!(&product / &ab_plus_b_square_plus_two == ab_plus_a_square_plus_one);
 
+    assert!(a_plus_b == &a + &b);
+    assert!(one == 1);
     assert!(product.checked_div(&(&a * &a)).is_none());
     assert!(product.checked_div(&(&b * &b)).is_none());
-    assert!(product.checked_div(2).is_none());
-    assert!(product.checked_div(1).unwrap() == product);
+    assert!(product.checked_div(&2.into()).is_none());
+    assert!(product.checked_div(&1.into()).unwrap() == product);
 }
 
 #[test]
@@ -193,7 +199,6 @@ pub fn add_test() {
     // a + b + 1
     let a_plus_b_plus_1_v1 = &(&a + &b) + 1;
     let a_plus_b_plus_1_v2 = &(&a_mon + &b) + 1;
-    println!("{} - {}", a_plus_b_plus_1_v1, a_plus_b_plus_1_v2);
     // 2a + 2b + 2
     let a_plus_b_plus_1_times_2 = &a_plus_b_plus_1_v1 + &a_plus_b_plus_1_v2;
 

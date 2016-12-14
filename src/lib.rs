@@ -3,18 +3,18 @@
 //! The central struct of the crate is `Polynomial<I, C, P>`. The three generic arguments
 //! specify the types of three internal parts:
 //!
-//! I - the type which uniquely identifies a single primitive variable, e.g. if we have a^x ,
-//! then `a: I`. Note that this does not mean that it is an `Integer`, but rather it is a type
+//! `I: Id` - the type which uniquely identifies a single primitive variable, e.g. if we have a^x ,
+//! then `a: Id`. Note that this does not mean that it is an `Integer`, but rather it is a type
 //! which can uniquely defined variables. For instance one can use a `String` by naming each
 //! variable. The type must implement `VariableDisplay` in order to provide a way for displaying
 //! a variable differently from `Display`.
 //!
-//! C - the primitive `Integer` type of the internal coefficients for each monomial.
+//! `C: Coefficient` - the primitive `Integer` type of the internal coefficients for each monomial.
 //! The `Polynomial<C, I, P>` will have implemented standard operators for interacting with type `C`.
 //! Whenever you evaluate a polynomial, the output would be of this type.
 //!
-//! P - the `Integer` type type of the power values of each monomial, e.g. if we have a^x ,
-//! then `x: P`. Note that it is required that `P` is an `Unsigned` type.
+//! `P: Power` - the `Integer` type type of the power values of each monomial, e.g. if we have a^x ,
+//! then `x: Power`. Note that it is required that `P` is an `Unsigned` type.
 //!
 //! The choice of `C` and `P` should depend on the problem you are using the library for. If you
 //! do not expect too high power values setting `P` to `u8` or `u16` should suffice. The `I` can
@@ -29,20 +29,22 @@
 //!
 //! #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 //! struct VarId{
-//!     pub id: u16
+//!     pub id: u8
 //! }
 //!
-//! impl From<u16> for VarId {
-//!     fn from(other: u16) -> Self {
+//! impl From<u8> for VarId {
+//!     fn from(other: u8) -> Self {
 //!         VarId{id: other}
 //!     }
 //! }
 //!
-//! impl VariableDisplay for VarId {
-//!     fn var_fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error>{
-//!         write!(f, "{}", (self.id as u8+ ('a' as u8)) as char)
+//! impl ::std::fmt::Display for VarId {
+//!     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+//!         write!(f, "{}", (self.id + 'a' as u8) as char)
 //!     }
 //! }
+//!
+//! impl VariableDisplay for VarId {}
 //!
 //! type SymInt = Polynomial<VarId, i64, u8>;
 //!
@@ -145,12 +147,14 @@
 
 extern crate num;
 
+mod traits;
 mod functions;
 mod monomial;
 mod polynomial;
 mod composite;
 mod integer_impl;
 
+pub use traits::*;
 pub use monomial::*;
 pub use polynomial::*;
 pub use composite::*;

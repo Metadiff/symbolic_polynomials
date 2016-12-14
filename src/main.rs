@@ -14,11 +14,13 @@ impl From<u8> for VarId {
     }
 }
 
-impl VariableDisplay for VarId {
-    fn var_fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+impl ::std::fmt::Display for VarId {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
         write!(f, "{}", (self.id + 'a' as u8) as char)
     }
 }
+
+impl VariableDisplay for VarId {}
 
 type SymInt = Polynomial<VarId, i64, u8>;
 

@@ -1,7 +1,7 @@
 use std::cmp::{Ord, Ordering};
 
+use traits::*;
 use polynomial::Polynomial;
-use functions::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Composite<I, C, P>
@@ -12,6 +12,42 @@ pub enum Composite<I, C, P>
     Min(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
     Max(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
 }
+
+impl<I, C, P> Composite<I, C, P>
+    where I: Id, C: Coefficient, P: Power {
+    /// Evaluates the `Composite` given the primitive variables assignment in `values`.
+    pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+        match *self {
+            Composite::Variable(ref x) => values.get(x).cloned().ok_or(x.clone()),
+            Composite::Floor(ref x, ref y) => {
+                let v_x = x.evaluate(values)?;
+                let v_y = y.evaluate(values)?;
+                Ok(C::div_floor(&v_x, &v_y))
+            }
+            Composite::Ceil(ref x, ref y) => {
+                let v_x = x.evaluate(values)?;
+                let v_y = y.evaluate(values)?;
+                let (d, rem) = v_x.div_rem(&v_y);
+                if rem == C::zero() {
+                    Ok(d)
+                } else {
+                    Ok(d + C::one())
+                }
+            }
+            Composite::Min(ref x, ref y) => {
+                let v_x = x.evaluate(values)?;
+                let v_y = y.evaluate(values)?;
+                Ok(if v_x < v_y { v_x } else { v_y })
+            }
+            Composite::Max(ref x, ref y) => {
+                let v_x = x.evaluate(values)?;
+                let v_y = y.evaluate(values)?;
+                Ok(if v_x > v_y { v_x } else { v_y })
+            }
+        }
+    }
+}
+
 
 impl<I, C, P> ::std::fmt::Display for Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {
@@ -117,36 +153,36 @@ impl<I, C, P> Ord for Composite<I, C, P>
     }
 }
 
-impl<I, C, P> Evaluable<I, C> for Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
-        match *self {
-            Composite::Variable(ref x) => values.get(x).cloned().ok_or(x.clone()),
-            Composite::Floor(ref x, ref y) => {
-                let v_x = x.evaluate(values)?;
-                let v_y = y.evaluate(values)?;
-                Ok(C::div_floor(&v_x, &v_y))
-            }
-            Composite::Ceil(ref x, ref y) => {
-                let v_x = x.evaluate(values)?;
-                let v_y = y.evaluate(values)?;
-                let (d, rem) = v_x.div_rem(&v_y);
-                if rem == C::zero() {
-                    Ok(d)
-                } else {
-                    Ok(d + C::one())
-                }
-            }
-            Composite::Min(ref x, ref y) => {
-                let v_x = x.evaluate(values)?;
-                let v_y = y.evaluate(values)?;
-                Ok(if v_x < v_y { v_x } else { v_y })
-            }
-            Composite::Max(ref x, ref y) => {
-                let v_x = x.evaluate(values)?;
-                let v_y = y.evaluate(values)?;
-                Ok(if v_x > v_y { v_x } else { v_y })
-            }
-        }
-    }
-}
+// impl<I, C, P> Evaluable<I, C> for Composite<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+//        match *self {
+//            Composite::Variable(ref x) => values.get(x).cloned().ok_or(x.clone()),
+//            Composite::Floor(ref x, ref y) => {
+//                let v_x = x.evaluate(values)?;
+//                let v_y = y.evaluate(values)?;
+//                Ok(C::div_floor(&v_x, &v_y))
+//            }
+//            Composite::Ceil(ref x, ref y) => {
+//                let v_x = x.evaluate(values)?;
+//                let v_y = y.evaluate(values)?;
+//                let (d, rem) = v_x.div_rem(&v_y);
+//                if rem == C::zero() {
+//                    Ok(d)
+//                } else {
+//                    Ok(d + C::one())
+//                }
+//            }
+//            Composite::Min(ref x, ref y) => {
+//                let v_x = x.evaluate(values)?;
+//                let v_y = y.evaluate(values)?;
+//                Ok(if v_x < v_y { v_x } else { v_y })
+//            }
+//            Composite::Max(ref x, ref y) => {
+//                let v_x = x.evaluate(values)?;
+//                let v_y = y.evaluate(values)?;
+//                Ok(if v_x > v_y { v_x } else { v_y })
+//            }
+//        }
+//    }
+//

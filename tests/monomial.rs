@@ -3,20 +3,22 @@ use symints::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct VarId {
-    pub id: u16,
+    pub id: u8,
 }
 
-impl From<u16> for VarId {
-    fn from(other: u16) -> Self {
+impl From<u8> for VarId {
+    fn from(other: u8) -> Self {
         VarId { id: other }
     }
 }
 
-impl VariableDisplay for VarId {
-    fn var_fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-        write!(f, "{}", (self.id as u8 + ('a' as u8)) as char)
+impl ::std::fmt::Display for VarId {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+        write!(f, "{}", (self.id + 'a' as u8) as char)
     }
 }
+
+impl VariableDisplay for VarId {}
 
 type TestMonomial = Monomial<VarId, i64, u8>;
 type TestPolynomial = Polynomial<VarId, i64, u8>;
@@ -273,7 +275,7 @@ pub fn div_test() {
     assert!(a2.coefficient == 2);
     assert!(a2.powers == vec![(Composite::Variable(0.into()), 1)]);
 
-    assert!(abc_times_2.checked_div(4).is_none());
+    assert!(abc_times_2.checked_div(&4.into()).is_none());
     assert!(abc_times_2.checked_div(&a_square).is_none());
     assert!(abc_times_2.checked_div(&b_square).is_none());
     assert!(abc_times_2.checked_div(&c_square).is_none());

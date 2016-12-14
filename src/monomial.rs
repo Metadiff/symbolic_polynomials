@@ -1,9 +1,9 @@
 use std::ops::{MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
 use std::cmp::{Ord, Ordering};
 
+use traits::*;
 use polynomial::Polynomial;
 use composite::Composite;
-use functions::*;
 
 #[derive(Clone, Default, Debug, Eq)]
 pub struct Monomial<I, C, P>
@@ -14,6 +14,7 @@ pub struct Monomial<I, C, P>
 
 impl<I, C, P> Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
+    /// Returns `true` if the the two monomials are equal when we ignore their coefficient.
     pub fn up_to_coefficient(&self, other: &Monomial<I, C, P>) -> bool {
         if self.powers.len() == other.powers.len() {
             for (&(ref c, ref power), &(ref o_c, ref o_power)) in self.powers.iter().zip(other.powers.iter()) {
@@ -26,18 +27,14 @@ impl<I, C, P> Monomial<I, C, P>
             false
         }
     }
-}
 
-impl<I, C, P> IsConstant for Monomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    fn is_constant(&self) -> bool {
+    /// Returns `true` if the polynomial does not depend on any variables.
+    pub fn is_constant(&self) -> bool {
         self.powers.is_empty()
     }
-}
 
-impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+    /// Evaluates the `Monomial` given the primitive variables assignment in `values`.
+    pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
         let mut value = self.coefficient.clone();
         for &(ref c, ref pow) in &self.powers {
             value *= ::num::pow(c.evaluate(values)?, pow.clone().into());
@@ -45,6 +42,17 @@ impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P>
         Ok(value)
     }
 }
+
+// impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+//        let mut value = self.coefficient.clone();
+//        for &(ref c, ref pow) in &self.powers {
+//            value *= ::num::pow(c.evaluate(values)?, pow.clone().into());
+//        }
+//        Ok(value)
+//    }
+//
 
 impl<I, C, P> ::std::fmt::Display for Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
@@ -253,27 +261,27 @@ impl<'a, 'b, I, C, P> Mul<&'a Polynomial<I, C, P>> for &'b Monomial<I, C, P>
     }
 }
 
-impl<I, C, P> CheckedDiv<C> for Monomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
-    type Output = Monomial<I, C, P>;
-    fn checked_div(&self, other: C) -> Option<Self::Output> {
-        let (d, rem) = self.coefficient.div_rem(&other);
-        if rem == C::zero() {
-            Some(Monomial {
-                coefficient: d,
-                powers: self.powers.clone(),
-            })
-        } else {
-            None
-        }
-    }
-}
+// impl<I, C, P> CheckedDiv<C> for Monomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    type Output = Monomial<I, C, P>;
+//    fn checked_div(&self, other: C) -> Option<Self::Output> {
+//        let (d, rem) = self.coefficient.div_rem(&other);
+//        if rem == C::zero() {
+//            Some(Monomial {
+//                coefficient: d,
+//                powers: self.powers.clone(),
+//            })
+//        } else {
+//            None
+//        }
+//    }
+//
 
 impl<'a, I, C, P> Div<C> for &'a Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     type Output = Monomial<I, C, P>;
     fn div(self, other: C) -> Self::Output {
-        self.checked_div(other).unwrap()
+        self.checked_div(&other.into()).unwrap()
     }
 }
 
@@ -289,10 +297,14 @@ impl<I, C, P> DivAssign<C> for Monomial<I, C, P>
     }
 }
 
-impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Monomial<I, C, P>
+// impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Monomial<I, C, P>
+//    where I: Id, C: Coefficient, P: Power {
+//    type Output = Monomial<I, C, P>;
+impl<I, C, P> Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    type Output = Monomial<I, C, P>;
-    fn checked_div(&self, rhs: &'a Monomial<I, C, P>) -> Option<Self::Output> {
+    /// If the the monomial is divisible by `rhs` than returns the result
+    /// of that division, otherwise None.
+    pub fn checked_div(&self, rhs: &Monomial<I, C, P>) -> Option<Self> {
         let (d, rem) = self.coefficient.div_rem(&rhs.coefficient);
         if rem == C::zero() {
             let mut result = Monomial {
