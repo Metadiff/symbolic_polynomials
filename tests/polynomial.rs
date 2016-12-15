@@ -1,5 +1,4 @@
-#[warn(unused_imports)]
-use std::rc::Rc;
+use std::collections::HashMap;
 extern crate symints;
 use symints::*;
 
@@ -219,82 +218,27 @@ pub fn sub_test() {
 
 #[test]
 pub fn eval_test() {
-    // TODO
-}
-
-#[test]
-pub fn max_test() {
-    let thirteen = TestPolynomial::from(13);
-    let three = TestPolynomial::from(3);
-    let thirteen_v2 = max(&thirteen, &three);
     let a: TestPolynomial = primitive("a".into());
     let b: TestPolynomial = primitive("b".into());
-    let a_square = &a * &a;
-    let a_v2 = max(&a_square, &a);
-    let a_square_ceil_b = max(&a_square, &b);
+    let c: TestPolynomial = primitive("c".into());
 
-    assert!(thirteen_v2 == 13 && 13 == thirteen_v2);
-    assert!(a_v2.monomials.len() == 1);
-    assert!(a_v2.monomials[0].coefficient == 1);
-    assert!(a_v2.monomials[0].powers == vec![(Composite::Max(Rc::new(a_square.clone()), Rc::new(a)), 1)]);
-    assert!(a_square_ceil_b.monomials.len() == 1);
-    assert!(a_square_ceil_b.monomials[0].coefficient == 1);
-    assert!(a_square_ceil_b.monomials[0].powers == vec![(Composite::Max(Rc::new(a_square), Rc::new(b)), 1)]);
-}
+    let mut values = HashMap::<String, i64>::new();
+    values.insert("a".into(), 3);
+    values.insert("b".into(), 13);
 
-#[test]
-pub fn min_test() {
-    let thirteen = TestPolynomial::from(13);
-    let three = TestPolynomial::from(3);
-    let three_v2 = min(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
-    let a_square = &a * &a;
-    let a_v2 = min(&a_square, &a);
-    let a_square_ceil_b = min(&a_square, &b);
+    // a + b + 1
+    let a_plus_b_plus_1 = &(&a + &b) + 1;
+    assert!(a_plus_b_plus_1.evaluate(&values) == Ok(17));
 
-    assert!(three_v2 == 3 && 3 == three_v2);
-    assert!(a_v2.monomials.len() == 1);
-    assert!(a_v2.monomials[0].coefficient == 1);
-    assert!(a_v2.monomials[0].powers == vec![(Composite::Min(Rc::new(a_square.clone()), Rc::new(a)), 1)]);
-    assert!(a_square_ceil_b.monomials.len() == 1);
-    assert!(a_square_ceil_b.monomials[0].coefficient == 1);
-    assert!(a_square_ceil_b.monomials[0].powers == vec![(Composite::Min(Rc::new(a_square), Rc::new(b)), 1)]);
-}
+    // ab + a^2 + 1
+    let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
+    assert!(ab_plus_a_square_plus_one.evaluate(&values) == Ok(49));
 
-#[test]
-pub fn ceil_test() {
-    let thirteen = TestPolynomial::from(13);
-    let three = TestPolynomial::from(3);
-    let five = ceil(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
-    let a_square = &a * &a;
-    let a_v2 = ceil(&a_square, &a);
-    let a_square_ceil_b = ceil(&a_square, &b);
+    // a + b + c + 1
+    let a_plus_b_plus_c_plus_1 = &(&a + &b) + &(&c + 1);
+    assert!(a_plus_b_plus_c_plus_1.evaluate(&values) == Err("c".into()));
 
-    assert!(five == 5 && 5 == five);
-    assert!(a_v2 == a);
-    assert!(a_square_ceil_b.monomials.len() == 1);
-    assert!(a_square_ceil_b.monomials[0].coefficient == 1);
-    assert!(a_square_ceil_b.monomials[0].powers == vec![(Composite::Ceil(Rc::new(a_square), Rc::new(b)), 1)]);
-}
-
-
-#[test]
-pub fn floor_test() {
-    let thirteen = TestPolynomial::from(13);
-    let three = TestPolynomial::from(3);
-    let four = floor(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
-    let a_square = &a * &a;
-    let a_v2 = floor(&a_square, &a);
-    let a_square_floor_b = floor(&a_square, &b);
-
-    assert!(four == 4 && 4 == four);
-    assert!(a_v2 == a && a == a_v2);
-    assert!(a_square_floor_b.monomials.len() == 1);
-    assert!(a_square_floor_b.monomials[0].coefficient == 1);
-    assert!(a_square_floor_b.monomials[0].powers == vec![(Composite::Floor(Rc::new(a_square), Rc::new(b)), 1)]);
+    // ab + bc + c^2
+    let ab_plus_bc_plus_c_square = &(&b * &(&a + &c)) + &(&c + &c);
+    assert!(ab_plus_bc_plus_c_square.evaluate(&values) == Err("c".into()));
 }

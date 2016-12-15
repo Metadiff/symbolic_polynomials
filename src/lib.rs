@@ -6,19 +6,20 @@
 //! `I: Id` - the type which uniquely identifies a single primitive variable, e.g. if we have a^x ,
 //! then `a: Id`. Note that this does not mean that it is an `Integer`, but rather it is a type
 //! which can uniquely defined variables. For instance one can use a `String` by naming each
-//! variable. The type must implement `VariableDisplay` in order to provide a way for displaying
-//! a variable differently from `Display`.
+//! variable. Importantly, the ordering of `I` defines the total ordering of the monomials
+//! which is used to define the ordering of the polynomials as well -
+//! [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Monomial_ordering).
 //!
 //! `C: Coefficient` - the primitive `Integer` type of the internal coefficients for each monomial.
 //! The `Polynomial<C, I, P>` will have implemented standard operators for interacting with type `C`.
 //! Whenever you evaluate a polynomial, the output would be of this type.
 //!
-//! `P: Power` - the `Integer` type type of the power values of each monomial, e.g. if we have a^x ,
+//! `P: Power` - the `Integer` type of the power values of each monomial, e.g. if we have a^x ,
 //! then `x: Power`. Note that it is required that `P` is an `Unsigned` type.
 //!
 //! The choice of `C` and `P` should depend on the problem you are using the library for. If you
-//! do not expect too high power values setting `P` to `u8` or `u16` should suffice. The `I` can
-//! be literally anything you want. In all of the tests `Polynomial<u16, i64, u8>` is used.
+//! do not expect too high power values setting `P` to `u8` or `u16` should suffice.
+//! In all of the tests `Polynomial<String, i64, u8>` is used.
 //!
 //! # Examples
 //! ```
@@ -125,6 +126,9 @@
 //!     println!("{:?}", eval_shape(&temp, &values));
 //! }
 //! ```
+//! The polynomials are used in `Metadiff` for modeling the shapes of tensors.
+//! A small example of how this can be achieved is shown
+//! [here](https://gist.github.com/botev/bac770e32f7df341ce18562f5333e5e5).
 
 extern crate num;
 

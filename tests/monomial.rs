@@ -1,5 +1,6 @@
 extern crate symints;
 use symints::*;
+use std::collections::HashMap;
 
 type TestMonomial = Monomial<String, i64, u8>;
 type TestPolynomial = Polynomial<String, i64, u8>;
@@ -333,5 +334,31 @@ pub fn sub_test() {
 
 #[test]
 pub fn eval_test() {
-    // TODO
+    let a = TestMonomial {
+        coefficient: 1,
+        powers: vec![(Composite::Variable("a".into()), 1)],
+    };
+    let b = TestMonomial {
+        coefficient: 1,
+        powers: vec![(Composite::Variable("b".into()), 1)],
+    };
+    let c = TestMonomial {
+        coefficient: 1,
+        powers: vec![(Composite::Variable("c".into()), 1)],
+    };
+
+    let mut values = HashMap::<String, i64>::new();
+    values.insert("a".into(), 3);
+    values.insert("b".into(), 13);
+
+    assert!(a.evaluate(&values) == Ok(3));
+    assert!(b.evaluate(&values) == Ok(13));
+    assert!(c.evaluate(&values) == Err("c".into()));
+
+    assert!((&a * &a).evaluate(&values) == Ok(9));
+    assert!((&b * &b).evaluate(&values) == Ok(169));
+    assert!((&a * &c).evaluate(&values) == Err("c".into()));
+
+    assert!((&a + &b).evaluate(&values) == Ok(16));
+    assert!((&c + &b).evaluate(&values) == Err("c".into()));
 }
