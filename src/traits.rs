@@ -28,4 +28,3 @@ Clone + ::std::fmt::Display + ::std::fmt::Debug {}
 impl<T> Coefficient for T where T: Integer + One + ::num::ToPrimitive + ::num::FromPrimitive +
 AddAssign<T> + SubAssign<T> + MulAssign<T> + DivAssign<T> + Neg<Output=T> +
 Clone + ::std::fmt::Display + ::std::fmt::Debug {}
-

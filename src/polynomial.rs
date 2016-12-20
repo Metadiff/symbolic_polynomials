@@ -35,7 +35,7 @@ impl<I, C, P> Polynomial<I, C, P>
     /// Returns a code equivalent string representation of the `Polynomial`.
     /// The `format` specifies a function how to render the identifiers;
     pub fn to_code<F>(&self, format: &F) -> String
-        where F: ::std::ops::Fn(I) -> String  {
+        where F: ::std::ops::Fn(I) -> String {
         match self.monomials.len() {
             0 => "0".into(),
             _ => {
@@ -413,10 +413,10 @@ impl<I, C, P> AddAssign<C> for Polynomial<I, C, P>
         if rhs != C::zero() {
             let mut remove: bool = false;
             if let Some(ref mut l) = self.monomials.last_mut() {
-                if l.is_constant(){
-                    if l.coefficient != - rhs.clone() {
+                if l.is_constant() {
+                    if l.coefficient != -rhs.clone() {
                         l.coefficient += rhs;
-                        return
+                        return;
                     } else {
                         remove = true;
                     }

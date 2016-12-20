@@ -48,7 +48,7 @@ impl<I, C, P> Monomial<I, C, P>
     /// Returns a code equivalent string representation of the `Monomial`.
     /// The `format` specifies a function how to render the identifiers;
     pub fn to_code<F>(&self, format: &F) -> String
-        where F: ::std::ops::Fn(I) -> String  {
+        where F: ::std::ops::Fn(I) -> String {
         let mut str: String = "".into();
         if self.coefficient == C::zero() {
             return "0".into();

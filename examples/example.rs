@@ -31,7 +31,7 @@ pub fn main() {
     // max (ab + 12, ab + a)
     let poly9 = max(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
-    let poly10 = max(&(&floor(&(&a *&a), &b) - 2), &(&ceil(&c, &b) + 1));
+    let poly10 = max(&(&floor(&(&a * &a), &b) - 2), &(&ceil(&c, &b) + 1));
 
     // Polynomial printing
     println!("{}", (0..50).map(|_| "=").collect::<String>());
@@ -71,8 +71,8 @@ pub fn main() {
     values.insert("b".into(), 3);
     values.insert("c".into(), 8);
     let implicit_values = vec![(poly1.clone(), poly1.eval(&values).unwrap()),
-    (poly2.clone(), poly2.eval(&values).unwrap()),
-    (poly3.clone(), poly3.eval(&values).unwrap())];
+                               (poly2.clone(), poly2.eval(&values).unwrap()),
+                               (poly3.clone(), poly3.eval(&values).unwrap())];
     let deduced_values = deduce_values(&implicit_values).unwrap();
     println!("Deduced values:");
     println!("a = {} [Expected 5]", deduced_values["a"]);

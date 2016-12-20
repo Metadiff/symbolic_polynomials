@@ -274,8 +274,6 @@ pub fn eval_test() {
     values.insert("a".into(), 3);
     values.insert("b".into(), -4);
     values.insert("c".into(), 5);
-    assert!(floor(&product, &a_plus_b_plus_1).eval(&values) ==
-            Err(("".into(), "Attempting division by zero.".into())));
-    assert!(ceil(&product, &a_plus_b_plus_1).eval(&values) ==
-            Err(("".into(), "Attempting division by zero.".into())));
+    assert!(floor(&product, &a_plus_b_plus_1).eval(&values) == Err(("".into(), "Attempting division by zero.".into())));
+    assert!(ceil(&product, &a_plus_b_plus_1).eval(&values) == Err(("".into(), "Attempting division by zero.".into())));
 }
