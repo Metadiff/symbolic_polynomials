@@ -12,7 +12,7 @@ license = "Apache-2.0"
 exclude = [ "examples/*" ]
 
 [dependencies.num]
-version = "*"
+version = "0.1.36"
 default-features = false
 
 [lib]
