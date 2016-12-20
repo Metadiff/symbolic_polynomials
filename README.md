@@ -1,6 +1,6 @@
 # Symbolic Polynomials
-[![Build Status](https://travis-ci.org/Metadiff/symints.svg?branch=master)](https://travis-ci.org/Metadiff/symints)
-[![Documentation](https://img.shields.io/badge/doc-master-brightgreen.svg)](https://metadiff.github.io/symints)
+[![Build Status](https://travis-ci.org/Metadiff/symints.svg?branch=master)](https://travis-ci.org/Metadiff/symbolic_polynomials)
+[![Documentation](https://img.shields.io/badge/doc-master-brightgreen.svg)](https://Metadiff.github.io/symbolic_polynomials)
 [![License](https://img.shields.io/badge/Licence-Apache2.0-blue.svg)](./LICENSE)
 [![](http://meritbadge.herokuapp.com/symbolic_polynomials)](https://crates.io/crates/symbolic_polynomials)
 
