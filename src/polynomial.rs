@@ -4,15 +4,17 @@ use std::cmp::{Ord, Ordering};
 use traits::*;
 use monomial::Monomial;
 
-#[derive(Clone, Default, Debug, Eq)]
+#[derive(Clone, Debug, Eq)]
+/// A symbolic polynomial represented as  m_1 + m_2 + ... + m_n.
 pub struct Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
+    /// A vector of the monomials m_i, where m_i is a Monomial.
     pub monomials: Vec<Monomial<I, C, P>>,
 }
 
 impl<I, C, P> Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    /// Returns `true` if the polynomial does not depend on any variables.
+    /// `True` only if the polynomial is constant and does not depend on any symbolic variables.
     pub fn is_constant(&self) -> bool {
         match self.monomials.len() {
             0 => true,
@@ -21,17 +23,40 @@ impl<I, C, P> Polynomial<I, C, P>
         }
     }
 
-    /// Evaluates the polynomial given the primitive variables assignment in `values`.
-    pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+    /// Evaluates the `Polynomial` given the provided mapping of identifier to value assignment.
+    pub fn eval(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, (I, String)> {
         let mut value = C::zero();
         for m in &self.monomials {
-            value += m.evaluate(values)?;
+            value += m.eval(values)?;
         }
         Ok(value)
     }
 
+    /// Returns a code equivalent string representation of the `Polynomial`.
+    /// The `format` specifies a function how to render the identifiers;
+    pub fn to_code<F>(&self, format: &F) -> String
+        where F: ::std::ops::Fn(I) -> String  {
+        match self.monomials.len() {
+            0 => "0".into(),
+            _ => {
+                let mut str: String;
+                str = self.monomials[0].to_code(format);
+                for m in self.monomials.iter().skip(1) {
+                    if m.coefficient > C::zero() {
+                        str += " + ";
+                        str += &m.to_code(format);
+                    } else {
+                        str += " ";
+                        str += &m.to_code(format);
+                    }
+                }
+                str
+            }
+        }
+    }
+
     /// Returns the result of the polynomial division with `rhs` as well as the reminder.
-    /// Note that this division depends on the ordering of the primitive variables type `I`
+    /// Note that this division depends on the ordering of the variable variables type `I`
     /// as explained in [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Reduction).
     pub fn div_rem(&self, rhs: &Polynomial<I, C, P>) -> (Polynomial<I, C, P>, Polynomial<I, C, P>) {
         let mut result = Polynomial { monomials: Vec::new() };
@@ -59,17 +84,6 @@ impl<I, C, P> Polynomial<I, C, P>
         }
     }
 }
-
-// impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
-//        let mut value = C::zero();
-//        for m in &self.monomials {
-//            value += m.evaluate(values)?;
-//        }
-//        Ok(value)
-//    }
-//
 
 impl<I, C, P> ::std::fmt::Display for Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
@@ -213,11 +227,7 @@ impl<I, C, P> PartialOrd for Polynomial<I, C, P>
 impl<I, C, P> Ord for Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     fn cmp(&self, other: &Polynomial<I, C, P>) -> Ordering {
-        let m = if self.monomials.len() < other.monomials.len() {
-            self.monomials.len()
-        } else {
-            other.monomials.len()
-        };
+        let m = ::std::cmp::min(self.monomials.len(), other.monomials.len());
         for i in 0..m {
             match Ord::cmp(&self.monomials[i], &other.monomials[i]) {
                 Ordering::Equal => {}
@@ -403,9 +413,11 @@ impl<I, C, P> AddAssign<C> for Polynomial<I, C, P>
         if rhs != C::zero() {
             let mut remove: bool = false;
             if let Some(ref mut l) = self.monomials.last_mut() {
-                if l.is_constant() {
-                    l.coefficient += rhs.clone();
-                    if l.coefficient == C::zero() {
+                if l.is_constant(){
+                    if l.coefficient != - rhs.clone() {
+                        l.coefficient += rhs;
+                        return
+                    } else {
                         remove = true;
                     }
                 }
@@ -480,7 +492,7 @@ impl<'a, I, C, P> AddAssign<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
             } else {
                 self.monomials.insert(i1, rhs.monomials[i2].clone());
                 i1 += 1;
-                i2 += 2;
+                i2 += 1;
             }
         }
         while i2 < rhs.monomials.len() {

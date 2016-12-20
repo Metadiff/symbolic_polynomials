@@ -1,13 +1,13 @@
 use std::collections::HashMap;
-extern crate symints;
-use symints::*;
+extern crate symbolic_polynomials;
+use symbolic_polynomials::*;
 
 type TestMonomial = Monomial<String, i64, u8>;
 type TestPolynomial = Polynomial<String, i64, u8>;
 
 #[test]
 pub fn constructor() {
-    let a: TestPolynomial = primitive("a".into());
+    let a: TestPolynomial = variable("a".into());
     let b_mon = TestMonomial {
         coefficient: 1,
         powers: vec![(Composite::Variable("b".into()), 1)],
@@ -39,10 +39,10 @@ pub fn constructor() {
 
 #[test]
 pub fn partial_eq_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
-    let a_v2: TestPolynomial = primitive("a".into());
-    let b_v2: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let a_v2: TestPolynomial = variable("a".into());
+    let b_v2: TestPolynomial = variable("b".into());
     // ab
     let ab = &a * &b;
     // a + b
@@ -70,8 +70,8 @@ pub fn partial_eq_test() {
 
 #[test]
 pub fn ord_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     // a^2
     let a_square = &a * &a;
     // b^2
@@ -114,8 +114,8 @@ pub fn ord_test() {
 
 #[test]
 pub fn mul_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -146,8 +146,8 @@ pub fn mul_test() {
 
 #[test]
 pub fn div_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
     // ab + b^2 + 1
@@ -174,8 +174,8 @@ pub fn add_test() {
         coefficient: 1,
         powers: vec![(Composite::Variable("a".into()), 1)],
     };
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     // a + b + 1
     let a_plus_b_plus_1_v1 = &(&a + &b) + 1;
     let a_plus_b_plus_1_v2 = &(&a_mon + &b) + 1;
@@ -202,8 +202,8 @@ pub fn add_test() {
 
 #[test]
 pub fn sub_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     // a + b + 1
     let a_plus_b_plus_1 = &(&a + &b) + 1;
     // 2a + 2b + 2
@@ -218,27 +218,64 @@ pub fn sub_test() {
 
 #[test]
 pub fn eval_test() {
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
-    let c: TestPolynomial = primitive("c".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let d: TestPolynomial = variable("d".into());
 
     let mut values = HashMap::<String, i64>::new();
     values.insert("a".into(), 3);
-    values.insert("b".into(), 13);
+    values.insert("b".into(), 7);
+    values.insert("c".into(), 5);
 
     // a + b + 1
     let a_plus_b_plus_1 = &(&a + &b) + 1;
-    assert!(a_plus_b_plus_1.evaluate(&values) == Ok(17));
+    assert!(a_plus_b_plus_1.eval(&values) == Ok(11));
 
     // ab + a^2 + 1
     let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
-    assert!(ab_plus_a_square_plus_one.evaluate(&values) == Ok(49));
+    assert!(ab_plus_a_square_plus_one.eval(&values) == Ok(31));
 
     // a + b + c + 1
     let a_plus_b_plus_c_plus_1 = &(&a + &b) + &(&c + 1);
-    assert!(a_plus_b_plus_c_plus_1.evaluate(&values) == Err("c".into()));
+    assert!(a_plus_b_plus_c_plus_1.eval(&values) == Ok(16));
 
-    // ab + bc + c^2
-    let ab_plus_bc_plus_c_square = &(&b * &(&a + &c)) + &(&c + &c);
-    assert!(ab_plus_bc_plus_c_square.evaluate(&values) == Err("c".into()));
+    // ab + bc + cd
+    let ab_plus_bc_plus_cd = &(&b * &(&a + &c)) + &(&d + &c);
+    assert!(ab_plus_bc_plus_cd.eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
+
+    // a^3 + 2a^2b + a^2c + a^2 + a b^2 + abc + ab + a + b + c + 1 =
+    let product = &ab_plus_a_square_plus_one * &a_plus_b_plus_c_plus_1;
+    assert!(product.eval(&values) == Ok(496));
+
+    assert!(floor(&product, &3.into()).eval(&values) == Ok(165));
+    assert!(ceil(&product, &3.into()).eval(&values) == Ok(166));
+
+    assert!(floor(&product, &16.into()).eval(&values) == Ok(31));
+    assert!(ceil(&product, &16.into()).eval(&values) == Ok(31));
+
+    assert!(floor(&product, &a).eval(&values) == Ok(165));
+    assert!(ceil(&product, &a).eval(&values) == Ok(166));
+
+    assert!(floor(&product, &b).eval(&values) == Ok(70));
+    assert!(ceil(&product, &b).eval(&values) == Ok(71));
+
+    assert!(floor(&product, &c).eval(&values) == Ok(99));
+    assert!(ceil(&product, &c).eval(&values) == Ok(100));
+
+    assert!(max(&product, &ab_plus_a_square_plus_one).eval(&values) == Ok(496));
+    assert!(min(&product, &ab_plus_a_square_plus_one).eval(&values) == Ok(31));
+
+    assert!(max(&-&product, &ab_plus_a_square_plus_one).eval(&values) == Ok(31));
+    assert!(min(&-&product, &ab_plus_a_square_plus_one).eval(&values) == Ok(-496));
+
+    // Making a + b + 1 = 0
+    values.clear();
+    values.insert("a".into(), 3);
+    values.insert("b".into(), -4);
+    values.insert("c".into(), 5);
+    assert!(floor(&product, &a_plus_b_plus_1).eval(&values) ==
+            Err(("".into(), "Attempting division by zero.".into())));
+    assert!(ceil(&product, &a_plus_b_plus_1).eval(&values) ==
+            Err(("".into(), "Attempting division by zero.".into())));
 }

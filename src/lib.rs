@@ -3,14 +3,14 @@
 //! The central struct of the crate is `Polynomial<I, C, P>`. The three generic arguments
 //! specify the types of three internal parts:
 //!
-//! `I: Id` - the type which uniquely identifies a single primitive variable, e.g. if we have a^x ,
+//! `I: Id` - the type which uniquely identifies a single variable variable, e.g. if we have a^x ,
 //! then `a: Id`. Note that this does not mean that it is an `Integer`, but rather it is a type
 //! which can uniquely defined variables. For instance one can use a `String` by naming each
 //! variable. Importantly, the ordering of `I` defines the total ordering of the monomials
 //! which is used to define the ordering of the polynomials as well -
 //! [Wikipedia](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis#Monomial_ordering).
 //!
-//! `C: Coefficient` - the primitive `Integer` type of the internal coefficients for each monomial.
+//! `C: Coefficient` - the variable `Integer` type of the internal coefficients for each monomial.
 //! The `Polynomial<C, I, P>` will have implemented standard operators for interacting with type `C`.
 //! Whenever you evaluate a polynomial, the output would be of this type.
 //!
@@ -25,106 +25,88 @@
 //! ```
 //! use std::collections::HashMap;
 //!
-//! extern crate symints;
-//! use symints::*;
+//! extern crate symbolic_polynomials;
+//! use symbolic_polynomials::*;
 //!
 //! type SymInt = Polynomial<String, i64, u8>;
 //!
-//! type Shape = (SymInt, SymInt, SymInt, SymInt);
+//! pub fn main() {
+//!     // Create symbolic variables
+//!     let a: SymInt = variable("a".into());
+//!     let b: SymInt = variable("b".into());
+//!     let c: SymInt = variable("c".into());
 //!
-//! enum ConvolutionMode{
-//!     Valid,
-//!     Half,
-//!     Full
+//!     // Build polynomials
+//!     // 5b + 2
+//!     let poly1 = &(&b * 5) + 2;
+//!     // ab
+//!     let poly2 = &a * &b;
+//!     // ab + ac + b + c
+//!     let poly3 = &(&b + &c) * &(&a + 1);
+//!     // a^2 - ab + 12
+//!     let poly4 = &(&(&a * &a) - &(&a * &b)) + 12;
+//!     // ac^2 + 3a + bc^2 + 3b + c^2 + 3
+//!     let poly5 = &(&(&a + &b) + 1) * &(&(&c * 2) + 3);
+//!     // floor(a^2, b^2)
+//!     let poly6 = floor(&(&b * &b), &(&a * &a));
+//!     // ceil(a^2, b^2)
+//!     let poly7 = ceil(&(&b * &b), &(&a * &a));
+//!     // min(ab + 12, ab + a)
+//!     let poly8 = min(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+//!     // max (ab + 12, ab + a)
+//!     let poly9 = max(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+//!     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
+//!     let poly10 = max(&(&floor(&(&a *&a), &b) - 2), &(&ceil(&c, &b) + 1));
+//!
+//!     // Polynomial printing
+//!     println!("{}", (0..50).map(|_| "=").collect::<String>());
+//!     println!("{}", (0..50).map(|_| "=").collect::<String>());
+//!     println!("Displaying polynomials (string representation = code representation):");
+//!     println!("{} = {}", poly1, poly1.to_code(&|x: String| x));
+//!     println!("{} = {}", poly2, poly2.to_code(&|x: String| x));
+//!     println!("{} = {}", poly3, poly3.to_code(&|x: String| x));
+//!     println!("{} = {}", poly4, poly4.to_code(&|x: String| x));
+//!     println!("{} = {}", poly5, poly5.to_code(&|x: String| x));
+//!     println!("{} = {}", poly6, poly6.to_code(&|x: String| x));
+//!     println!("{} = {}", poly7, poly7.to_code(&|x: String| x));
+//!     println!("{} = {}", poly8, poly8.to_code(&|x: String| x));
+//!     println!("{} = {}", poly9, poly9.to_code(&|x: String| x));
+//!     println!("{} = {}", poly10, poly10.to_code(&|x: String| x));
+//!     println!("{}", (0..50).map(|_| "=").collect::<String>());
+//!
+//!     // Polynomial evaluation
+//!     let mut values = HashMap::<String, i64>::new();
+//!     values.insert("a".into(), 3);
+//!     values.insert("b".into(), 2);
+//!     values.insert("c".into(), 5);
+//!     println!("Evaluating for a = 3, b = 2, c = 5.");
+//!     println!("{} = {} [Expected 12]", poly1, poly1.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 6]", poly2, poly2.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 28]", poly3, poly3.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 15]", poly4, poly4.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 78]", poly5, poly5.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 0]", poly6, poly6.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 1]", poly7, poly7.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 9]", poly8, poly8.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 18]", poly9, poly9.eval(&values).unwrap());
+//!     println!("{} = {} [Expected 4]", poly10, poly10.eval(&values).unwrap());
+//!     println!("{}", (0..50).map(|_| "=").collect::<String>());
+//!
+//!     // Variable deduction
+//!     values.insert("a".into(), 5);
+//!     values.insert("b".into(), 3);
+//!     values.insert("c".into(), 8);
+//!     let implicit_values = vec![(poly1.clone(), poly1.eval(&values).unwrap()),
+//!     (poly2.clone(), poly2.eval(&values).unwrap()),
+//!     (poly3.clone(), poly3.eval(&values).unwrap())];
+//!     let deduced_values = deduce_values(&implicit_values).unwrap();
+//!     println!("Deduced values:");
+//!     println!("a = {} [Expected 5]", deduced_values["a"]);
+//!     println!("b = {} [Expected 3]", deduced_values["b"]);
+//!     println!("c = {} [Expected 8]", deduced_values["c"]);
+//!     println!("{}", (0..50).map(|_| "=").collect::<String>());
 //! }
 //!
-//! fn is_2d(shape: &Shape) -> bool {
-//!     shape.2 == 1 && shape.3 == 1
-//! }
-//!
-//! fn matrix_mul_shape(left: &Shape, right: &Shape) -> Option<Shape> {
-//!     // Check we have a 2D tensors with matching middle dimension
-//!     if left.1 != right.0 || left.2 != 1 || left.3 != 1 || right.2 != 1 || right.3 != 1 {
-//!         None
-//!     } else {
-//!         Some((left.0.clone(), right.1.clone(), 1.into(), 1.into()))
-//!     }
-//! }
-//!
-//! fn element_wise_shape(left: &Shape, right: &Shape) -> Option<Shape> {
-//!     // Check we have a 2D tensors with matching middle dimension
-//!     if left != right {
-//!         None
-//!     } else {
-//!         Some(left.clone())
-//!     }
-//! }
-//!
-//! fn convolution_2d_shape(image: &Shape, kernel: &Shape, stride: &Shape,
-//!                         mode: ConvolutionMode) -> Option<Shape> {
-//!     // Check everything is 2D
-//!     if is_2d(image) && is_2d(kernel) && is_2d(stride) {
-//!         let (padding0, padding1) : (SymInt, SymInt) = match mode {
-//!             ConvolutionMode::Valid => {
-//!                 (0.into(), 0.into())
-//!             },
-//!             ConvolutionMode::Half => {
-//!                 (floor(&kernel.0, &2.into()), floor(&kernel.1, &2.into()))
-//!             }
-//!             ConvolutionMode::Full => {
-//!                 (&kernel.0 - 1, &kernel.1 - 1)
-//!             }
-//!        };
-//!         Some((ceil(&(&(&image.0 - &kernel.0) + &(2 * &padding0)), &stride.0),
-//!               ceil(&(&(&image.1 - &kernel.1) + &(2 * &padding1)), &stride.1),
-//!               1.into(), 1.into()))
-//!     } else {
-//!         None
-//!     }
-//! }
-//!
-//! fn eval_shape(shape: &Shape, values: &HashMap<String, i64>) -> Result<(i64, i64, i64, i64), String> {
-//!     Ok((shape.0.evaluate(values)?,
-//!         shape.1.evaluate(values)?,
-//!         shape.2.evaluate(values)?,
-//!         shape.3.evaluate(values)?))
-//! }
-//!
-//! fn main(){
-//!     let a = primitive("a".into());
-//!     let b = primitive("b".into());
-//!     let c = primitive("c".into());
-//!     let d = primitive("d".into());
-//!     let mut values: HashMap<String, i64> = HashMap::new();
-//!     values.insert("a".into(), 20);
-//!     values.insert("b".into(), 7);
-//!     values.insert("c".into(), 10);
-//!     values.insert("d".into(), 3);
-//!     let mut temp: Shape;
-//!     let s1: Shape = (a.clone(), b.clone(), 1.into(), 1.into());
-//!     let s2: Shape = (b.clone(), c.clone(), 1.into(), 1.into());
-//!     let s3: Shape = (a.clone(), b.clone(), 1.into(), 1.into());
-//!     let im: Shape = (c.clone(), c.clone(), 1.into(), 1.into());
-//!     let ker: Shape = (d.clone(), d.clone(), 1.into(), 1.into());
-//!     let st: Shape = (2.into(), 2.into(), 1.into(), 1.into());
-//!     temp = matrix_mul_shape(&s1, &s2).unwrap();
-//!     println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
-//!     println!("{:?}", eval_shape(&temp, &values));
-//!     println!("{:?}", matrix_mul_shape(&s1, &s1));
-//!     temp = element_wise_shape(&s1, &s3).unwrap();
-//!     println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
-//!     println!("{:?}", eval_shape(&temp, &values));
-//!     println!("{:?}", element_wise_shape(&s1, &s2));
-//!     temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Valid).unwrap();
-//!     println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
-//!     println!("{:?}", eval_shape(&temp, &values));
-//!     temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Half).unwrap();
-//!     println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
-//!     println!("{:?}", eval_shape(&temp, &values));
-//!     temp = convolution_2d_shape(&im, &ker, &st, ConvolutionMode::Full).unwrap();
-//!     println!("({}, {}, {}, {})", temp.0, temp.1, temp.2, temp.3);
-//!     println!("{:?}", eval_shape(&temp, &values));
-//! }
 //! ```
 //! The polynomials are used in `Metadiff` for modeling the shapes of tensors.
 //! A small example of how this can be achieved is shown

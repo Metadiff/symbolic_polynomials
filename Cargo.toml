@@ -1,9 +1,9 @@
 [package]
-name = "symints"
-version = "0.0.1"
+name = "symbolic_polynomials"
+version = "0.1.0"
 authors = ["Aleksandzr Botev <botevmg@gmail.com>"]
 description = "A package for manipulation of polynomials over the integers."
-documentation = "http://botev.github.io/symbolic_polynomials/index.html"
+documentation = "http://botev.github.io/symints/index.html"
 homepage = "https://github.com/Metadiff/symints"
 repository = "https://github.com/Metadiff/symints"
 readme = "README.md"
@@ -15,12 +15,6 @@ version = "*"
 default-features = false
 
 [lib]
-name = "symints"
+name = "symbolic_polynomials"
 path = "src/lib.rs"
 doctest = true
-
-[[bin]]
-name = "main"
-path = "src/main.rs"
-
-

@@ -1,5 +1,5 @@
-extern crate symints;
-use symints::*;
+extern crate symbolic_polynomials;
+use symbolic_polynomials::*;
 use std::collections::HashMap;
 
 type TestMonomial = Monomial<String, i64, u8>;
@@ -346,19 +346,26 @@ pub fn eval_test() {
         coefficient: 1,
         powers: vec![(Composite::Variable("c".into()), 1)],
     };
+    let d = TestMonomial {
+        coefficient: 1,
+        powers: vec![(Composite::Variable("d".into()), 1)],
+    };
 
     let mut values = HashMap::<String, i64>::new();
     values.insert("a".into(), 3);
-    values.insert("b".into(), 13);
+    values.insert("b".into(), 7);
+    values.insert("c".into(), 5);
 
-    assert!(a.evaluate(&values) == Ok(3));
-    assert!(b.evaluate(&values) == Ok(13));
-    assert!(c.evaluate(&values) == Err("c".into()));
+    assert!(a.eval(&values) == Ok(3));
+    assert!(b.eval(&values) == Ok(7));
+    assert!(c.eval(&values) == Ok(5));
+    assert!(d.eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 
-    assert!((&a * &a).evaluate(&values) == Ok(9));
-    assert!((&b * &b).evaluate(&values) == Ok(169));
-    assert!((&a * &c).evaluate(&values) == Err("c".into()));
+    assert!((&a * &(2 * &a)).eval(&values) == Ok(18));
+    assert!((&a * &(2 * &b)).eval(&values) == Ok(42));
+    assert!((&c * &(&a * &b)).eval(&values) == Ok(105));
+    assert!((&(&d * &c) * &(&a * &b)).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 
-    assert!((&a + &b).evaluate(&values) == Ok(16));
-    assert!((&c + &b).evaluate(&values) == Err("c".into()));
+    assert!((&(&a + &b) + &(&c + 2)).eval(&values) == Ok(17));
+    assert!((&(&a + &b) + &(&c + &d)).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 }

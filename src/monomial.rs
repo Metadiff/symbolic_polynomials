@@ -6,15 +6,18 @@ use polynomial::Polynomial;
 use composite::Composite;
 
 #[derive(Clone, Default, Debug, Eq)]
+/// A symbolic monomial represented as  C * a_1^p_1 * a_2^p_2 * ... * a_n^p_n.
 pub struct Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
+    /// The constant coefficient C
     pub coefficient: C,
+    /// A vector of the pairs (a_i, p_i), where a_i is a Composite expression.
     pub powers: Vec<(Composite<I, C, P>, P)>,
 }
 
 impl<I, C, P> Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    /// Returns `true` if the the two monomials are equal when we ignore their coefficient.
+    /// Returns `true` if the the two monomials are equal when we ignore their coefficients.
     pub fn up_to_coefficient(&self, other: &Monomial<I, C, P>) -> bool {
         if self.powers.len() == other.powers.len() {
             for (&(ref c, ref power), &(ref o_c, ref o_power)) in self.powers.iter().zip(other.powers.iter()) {
@@ -28,31 +31,58 @@ impl<I, C, P> Monomial<I, C, P>
         }
     }
 
-    /// Returns `true` if the polynomial does not depend on any variables.
+    /// `True` only if the monomial is constant and does not depend on any symbolic variables.
     pub fn is_constant(&self) -> bool {
         self.powers.is_empty()
     }
 
-    /// Evaluates the monomial given the primitive variables assignment in `values`.
-    pub fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
+    /// Evaluates the `Monomial` given the provided mapping of identifier to value assignment.
+    pub fn eval(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, (I, String)> {
         let mut value = self.coefficient.clone();
         for &(ref c, ref pow) in &self.powers {
-            value *= ::num::pow(c.evaluate(values)?, pow.clone().into());
+            value *= ::num::pow(c.eval(values)?, pow.to_usize().unwrap());
         }
         Ok(value)
     }
-}
 
-// impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    fn evaluate(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, I> {
-//        let mut value = self.coefficient.clone();
-//        for &(ref c, ref pow) in &self.powers {
-//            value *= ::num::pow(c.evaluate(values)?, pow.clone().into());
-//        }
-//        Ok(value)
-//    }
-//
+    /// Returns a code equivalent string representation of the `Monomial`.
+    /// The `format` specifies a function how to render the identifiers;
+    pub fn to_code<F>(&self, format: &F) -> String
+        where F: ::std::ops::Fn(I) -> String  {
+        let mut str: String = "".into();
+        if self.coefficient == C::zero() {
+            return "0".into();
+        } else if self.coefficient == C::one() && self.powers.is_empty() {
+            return "1".into();
+        } else if self.coefficient == -C::one() && self.powers.is_empty() {
+            return "- 1".into();
+        } else if self.coefficient == -C::one() {
+            str = "- ".into();
+        } else if self.coefficient < C::zero() {
+            str = "- ".into();
+            str.push_str(&(-self.coefficient.clone()).to_string());
+        } else if self.coefficient != C::one() {
+            str = self.coefficient.clone().to_string();
+        }
+        let mut first = true;
+        for &(ref c, ref pow) in &self.powers {
+            if !first || (self.coefficient != C::one() && self.coefficient != -C::one()) {
+                str.push_str(" * ");
+            }
+            if pow == &P::one() {
+                str.push_str(&c.to_code(format));
+            } else if pow != &P::zero() {
+                str.push_str(&c.to_code(format));
+                for _ in 0..(pow.clone() - P::one()).to_usize().unwrap() {
+                    str.push_str(" * ");
+                    str.push_str(&c.to_code(format));
+                }
+            }
+            first = false;
+        }
+        str
+    }
+}
 
 impl<I, C, P> ::std::fmt::Display for Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {
@@ -80,31 +110,6 @@ impl<I, C, P> ::std::fmt::Display for Monomial<I, C, P>
         Ok(())
     }
 }
-
-// impl<I, C, P> ::std::fmt::Debug for Monomial<I, C, P> where I:Id, C: Coefficient, P: Power {
-//    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
-//        if self.coefficient == C::zero() {
-//            return write!(f, "0")
-//        } else {
-//            if self.coefficient < C::zero() {
-//                write!(f, "- {}", -self.coefficient.clone())?;
-//            } else {
-//                write!(f, "{}", self.coefficient.clone())?;
-//            }
-//        }
-//        for &(ref c, ref pow) in &self.powers {
-//            if pow != &P::zero() {
-//                let str = format!("{:?}", c);
-//                let repeated = iter::repeat(str)
-//                    .take(pow.clone().into())
-//                    .collect::<Vec<String>>()
-//                    .join("*");
-//                write!(f, "*{}",  repeated)?;
-//            }
-//        }
-//        Ok(())
-//    }
-//
 
 impl<I, C, P> From<C> for Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {

@@ -1,7 +1,9 @@
 use std::rc::Rc;
 use std::collections::HashMap;
-extern crate symints;
-use symints::*;
+extern crate symbolic_polynomials;
+extern crate num;
+use symbolic_polynomials::*;
+use num::Integer;
 
 type TestMonomial = Monomial<String, i64, u8>;
 type TestPolynomial = Polynomial<String, i64, u8>;
@@ -11,8 +13,8 @@ pub fn max_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let thirteen_v2 = max(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     let a_square = &a * &a;
     let a_third = &a_square * &a;
     let a_v2 = max(&a_square, &a);
@@ -33,9 +35,9 @@ pub fn max_test() {
     values.insert("a".into(), 3);
     values.insert("b".into(), 13);
 
-    assert!(thirteen.evaluate(&values) == Ok(13));
-    assert!(max_a_square_b.evaluate(&values) == Ok(13));
-    assert!(max_a_third_b.evaluate(&values) == Ok(27));
+    assert!(thirteen.eval(&values) == Ok(13));
+    assert!(max_a_square_b.eval(&values) == Ok(13));
+    assert!(max_a_third_b.eval(&values) == Ok(27));
 }
 
 #[test]
@@ -43,8 +45,8 @@ pub fn min_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let three_v2 = min(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     let a_square = &a * &a;
     let a_third = &a_square * &a;
     let a_v2 = min(&a_square, &a);
@@ -66,9 +68,9 @@ pub fn min_test() {
     values.insert("a".into(), 3);
     values.insert("b".into(), 13);
 
-    assert!(three_v2.evaluate(&values) == Ok(3));
-    assert!(min_a_square_b.evaluate(&values) == Ok(9));
-    assert!(min_a_third_b.evaluate(&values) == Ok(13));
+    assert!(three_v2.eval(&values) == Ok(3));
+    assert!(min_a_square_b.eval(&values) == Ok(9));
+    assert!(min_a_third_b.eval(&values) == Ok(13));
 }
 
 #[test]
@@ -76,8 +78,8 @@ pub fn ceil_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let five = ceil(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     let a_square = &a * &a;
     let a_third = &a_square * &a;
     let a_v2 = ceil(&a_square, &a);
@@ -97,9 +99,9 @@ pub fn ceil_test() {
     values.insert("a".into(), 3);
     values.insert("b".into(), 13);
 
-    assert!(five.evaluate(&values) == Ok(5));
-    assert!(ceil_a_square_b.evaluate(&values) == Ok(1));
-    assert!(ceil_a_third_b.evaluate(&values) == Ok(3));
+    assert!(five.eval(&values) == Ok(5));
+    assert!(ceil_a_square_b.eval(&values) == Ok(1));
+    assert!(ceil_a_third_b.eval(&values) == Ok(3));
 }
 
 #[test]
@@ -107,8 +109,8 @@ pub fn floor_test() {
     let thirteen = TestPolynomial::from(13);
     let three = TestPolynomial::from(3);
     let four = floor(&thirteen, &three);
-    let a: TestPolynomial = primitive("a".into());
-    let b: TestPolynomial = primitive("b".into());
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
     let a_square = &a * &a;
     let a_third = &a_square * &a;
     let a_v2 = floor(&a_square, &a);
@@ -128,7 +130,251 @@ pub fn floor_test() {
     values.insert("a".into(), 3);
     values.insert("b".into(), 13);
 
-    assert!(four.evaluate(&values) == Ok(4));
-    assert!(floor_a_square_b.evaluate(&values) == Ok(0));
-    assert!(floor_a_third_b.evaluate(&values) == Ok(2));
+    assert!(four.eval(&values) == Ok(4));
+    assert!(floor_a_square_b.eval(&values) == Ok(0));
+    assert!(floor_a_third_b.eval(&values) == Ok(2));
+}
+
+#[test]
+pub fn deduce_values_test1() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 1;
+    let b_val: i64 = 3;
+    let c_val: i64 = 7;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // a
+    let poly1 = a.clone();
+    let val1 = a_val;
+    implicit_values.push((poly1.clone(), val1));
+    // 2ab + 1
+    let poly2 = &(&(&a * &b) * 2) + 1;
+    let val2 = 2 * a_val * b_val + 1;
+    implicit_values.push((poly2.clone(), val2));
+    // 5a^2b^2c^2 + a^2b + 3
+    let poly3 = &(&(&(&(&a * &a) * &(&b * &b)) * &(&c * &c)) * 5) + &(&(&(&a * &a) * &b) + 3);
+    let val3 = 5 * a_val * a_val * b_val * b_val * c_val * c_val + a_val * a_val * b_val + 3;
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test2() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 2;
+    let b_val: i64 = 3;
+    let c_val: i64 = 5;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // abc^2 + abc + 1
+    let poly1 = &(&(&(&a * &b) * &c) + &(&(&(&a * &c) * &c) * &b)) + 1;
+    let val1 = a_val * b_val * c_val + a_val * c_val * c_val * b_val + 1;
+    implicit_values.push((poly1.clone(), val1));
+    // a^2 + c^2 + 2
+    let poly2 = &(&(&a * &a) + &(&c * &c)) + 2;
+    let val2 = a_val * a_val + c_val * c_val + 2;
+    implicit_values.push((poly2.clone(), val2));
+    // 5c
+    let poly3 = 5 * &c;
+    let val3 = 5 * c_val;
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test3() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 1;
+    let b_val: i64 = 2;
+    let c_val: i64 = 3;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // 3b^2
+    let poly1 = 3 * &(&b * &b);
+    let val1 = 3 * b_val * b_val;
+    implicit_values.push((poly1.clone(), val1));
+    // a^3 + b^3 - 10
+    let poly2 = &(&(&(&a * &a) * &a) + &(&(&b * &b) * &b)) - 10;
+    let val2 = a_val * a_val * a_val + b_val * b_val * b_val - 10;
+    implicit_values.push((poly2.clone(), val2));
+    // ab + ac + bc + 3
+    let poly3 = &(&(&(&a * &b) + &(&a * &c)) + &(&b * &c)) + 3;
+    let val3 = a_val * b_val + a_val * c_val + b_val * c_val + 3;
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test_floor_min() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 1;
+    let b_val: i64 = 3;
+    let c_val: i64 = 7;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // a
+    let poly1 = a.clone();
+    let val1 = a_val;
+    implicit_values.push((poly1.clone(), val1));
+    // 2ab + 1
+    let poly2 = &(&(&a * &b) * 2) + 1;
+    let val2 = 2 * a_val * b_val + 1;
+    implicit_values.push((poly2.clone(), val2));
+    // 5a^2b^2c^2 + floor(ab^2, 2) + min(a^2, b^2) + 3
+    let poly3 = &(&(&(&(&a * &a) * &(&b * &b)) * &(&c * &c)) * 5) +
+        &(&floor(&(&(&a * &b) * &b), &2.into()) +
+            &(&min(&(&a * &a), &(&b * &b)) + 3));
+    let val3 = 5 * a_val * a_val * b_val * b_val * c_val * c_val +
+        (a_val * b_val * b_val).div_floor(&2) +
+        ::std::cmp::min(a_val * a_val, b_val * b_val) + 3;
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test_ceil_max() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 2;
+    let b_val: i64 = 3;
+    let c_val: i64 = 5;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // abc^2 + abc + 1
+    let poly1 = &(&(&(&a * &b) * &c) + &(&(&(&a * &c) * &c) * &b)) + 1;
+    let val1 = a_val * b_val * c_val + a_val * c_val * c_val * b_val + 1;
+    implicit_values.push((poly1.clone(), val1));
+    // a^2 + ceil(c^2, 6) + max(c^2, 12) + 2
+    let poly2 = &(&(&a * &a) + &ceil(&(&c * &c), &6.into())) + &(&max(&(&c * &c), &12.into()) + 2);
+    let mut val2 = a_val * a_val + (c_val * c_val).div_floor(&6) + ::std::cmp::max(c_val * c_val, 12) + 2;
+    if c_val * c_val % 6 != 0 {
+        val2 += 1;
+    }
+    implicit_values.push((poly2.clone(), val2));
+    // 5c
+    let poly3 = 5 * &c;
+    let val3 = 5 * c_val;
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test_all() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 2;
+    let b_val: i64 = 3;
+    let c_val: i64 = 5;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // 3b^2
+    let poly1 = 3 * &(&b * &b);
+    let val1 = 3 * b_val * b_val;
+    implicit_values.push((poly1.clone(), val1));
+    // a^3 + floor(b^3, 3) - 10 - min(b^2, 17)
+    let poly2 = &(&(&(&(&a * &a) * &a) + &floor(&(&(&b * &b) * &b), &3.into())) -
+        &(&min(&(&b *&b), &17.into()) + 10));
+    let val2 = a_val * a_val * a_val + (b_val * b_val * b_val).div_floor(&3)
+        - 10 - ::std::cmp::min(b_val * b_val, 17);
+    implicit_values.push((poly2.clone(), val2));
+    // ceil(7ab, 5) + ac + bc + 3 + max(ab - 5, a + 2b)
+    let poly3 = &(&(&ceil(&(&( &(&a * &b) * 7)), &5.into()) + &(&a * &c)) + &(&b * &c)) +
+        &(&max(&(&(&a * &b) - 5), &(&a + &(2 * &b))) + 3);
+    let mut val3 = (7 * a_val * b_val).div_floor(&5) + a_val * c_val + b_val * c_val + 3
+        + ::std::cmp::max(a_val * b_val - 5, a_val + 2 * b_val);
+    if 7 * a_val * b_val % 5 != 0 {
+        val3 += 1;
+    }
+    implicit_values.push((poly3.clone(), val3));
+    let values = deduce_values(&implicit_values).unwrap();
+
+    assert!(a.eval(&values) == Ok(a_val));
+    assert!(b.eval(&values) == Ok(b_val));
+    assert!(c.eval(&values) == Ok(c_val));
+
+    assert!(poly1.eval(&values) == Ok(val1));
+    assert!(poly2.eval(&values) == Ok(val2));
+    assert!(poly3.eval(&values) == Ok(val3));
+}
+
+#[test]
+pub fn deduce_values_test_fails() {
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let c: TestPolynomial = variable("c".into());
+    let a_val: i64 = 1;
+    let b_val: i64 = 2;
+    let c_val: i64 = 3;
+    let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
+
+    // ab^2
+    let poly1 = &a * &(&b * &b);
+    let val1 = a_val * b_val * b_val;
+    implicit_values.push((poly1.clone(), val1));
+    // 2b + 1
+    let poly2 = &(&b * 2) + 1;
+    let val2 = 2 * b_val + 1;
+    implicit_values.push((poly2.clone(), val2));
+    // ac^2 + bc + 2
+    let poly3 = &(&(&(&a * &c) * &c) + &(&b * &c)) + 2;
+    let val3 = a_val * c_val * c_val + b_val * c_val + 2;
+    implicit_values.push((poly3.clone(), val3));
+    assert!(deduce_values(&implicit_values) == Err("Could not deduce all variables.".into()));
+
+    // 2bc + 1
+    let poly2 = &(&(&b * &c) * 2) + 1;
+    let val2 = 2 * b_val * c_val + 1;
+    implicit_values.remove(1);
+    implicit_values.push((poly2.clone(), val2));
+    assert!(deduce_values(&implicit_values) == Err("Could not deduce all variables.".into()));
 }
