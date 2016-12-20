@@ -1,5 +1,5 @@
 # Symbolic Polynomials
-[![Build Status](https://travis-ci.org/Metadiff/symints.svg?branch=master)](https://travis-ci.org/Metadiff/symbolic_polynomials)
+[![Build Status](https://travis-ci.org/Metadiff/symbolic_polynomials.svg?branch=master)](https://travis-ci.org/Metadiff/symbolic_polynomials)
 [![Documentation](https://img.shields.io/badge/doc-master-brightgreen.svg)](https://Metadiff.github.io/symbolic_polynomials)
 [![License](https://img.shields.io/badge/Licence-Apache2.0-blue.svg)](./LICENSE)
 [![](http://meritbadge.herokuapp.com/symbolic_polynomials)](https://crates.io/crates/symbolic_polynomials)
@@ -38,6 +38,7 @@ multiplications, and the output string would look like code snippet.
 One drawback is that all of the operators are defined for references.
 
 ## Installation
+
 Just add the dependency in your `Cargo.toml` file and then import the crate.
  
 ## Example usage

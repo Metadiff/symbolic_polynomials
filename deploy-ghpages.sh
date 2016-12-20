@@ -11,7 +11,7 @@ if [[ "$TRAVIS_RUST_VERSION" == "stable" && "$TRAVIS_BRANCH" == "master" ]]; the
     cp ../../index.html ./index.html
     git add .
     git commit -m "Deployed to Github Pages"
-    git push -f -q https://botev:${GITHUB_API_KEY}@github.com/Metadiff/symints gh-pages 1>&2 2>/dev/null
+    git push -f -q https://botev:${GITHUB_API_KEY}@${GH_REF} gh-pages 1>&2 2>/dev/null
     echo "Deployed to Github Pages"
     cd ${TRAVIS_BUILD_DIR}
 fi

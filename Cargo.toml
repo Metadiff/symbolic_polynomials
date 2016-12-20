@@ -1,14 +1,15 @@
 [package]
 name = "symbolic_polynomials"
 version = "0.1.0"
-authors = ["Aleksandzr Botev <botevmg@gmail.com>"]
-description = "A package for manipulation of polynomials over the integers."
-documentation = "http://botev.github.io/symints/index.html"
-homepage = "https://github.com/Metadiff/symints"
-repository = "https://github.com/Metadiff/symints"
+authors = ["Aleksandar Botev <botevmg@gmail.com>"]
+description = "A library for manipulation of polynomials over the integers."
+documentation = "http://Metadiff.github.io/symbolic_polynomials"
+homepage = "http://Metadiff.github.io/symbolic_polynomials"
+repository = "https://github.com/Metadiff/symbolic_polynomials"
 readme = "README.md"
-keywords = ["math", "symbolic", "integers"]
-license = "Apache 2.0"
+keywords = ["math", "symbolic", "polynomials"]
+license = "Apache-2.0"
+exclude = [ "examples/*" ]
 
 [dependencies.num]
 version = "*"
