@@ -45,8 +45,7 @@ Just add the dependency in your `Cargo.toml` file and then import the crate.
 
 Below is the code for a the example found in the `examples` folder.
 
-```
-
+```rust
 use std::collections::HashMap;
 
 extern crate symbolic_polynomials;
@@ -132,8 +131,7 @@ pub fn main() {
 ```
 
 The output of the program:
-```
-
+```rust
 ==================================================
 Displaying polynomials (string representation = code representation):
 5b + 2 = 5 * b + 2
