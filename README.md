@@ -61,39 +61,39 @@ pub fn main() {
 
     // Build polynomials
     // 5b + 2
-    let poly1 = &(&b * 5) + 2;
+    let poly1 = 5 * &b + 2;
     // ab
     let poly2 = &a * &b;
     // ab + ac + b + c
-    let poly3 = &(&b + &c) * &(&a + 1);
+    let poly3 = &a * &b + &a * &c + &b + &c;
     // a^2 - ab + 12
-    let poly4 = &(&(&a * &a) - &(&a * &b)) + 12;
+    let poly4 = &a * &a - &a * &b + 12;
     // ac^2 + 3a + bc^2 + 3b + c^2 + 3
-    let poly5 = &(&(&a + &b) + 1) * &(&(&c * 2) + 3);
+    let poly5 = &a * &c * &c + 3 * &a + &b * &c * &c + 3 * &b + &c * &c + 3;
     // floor(a^2, b^2)
-    let poly6 = floor(&(&b * &b), &(&a * &a));
+    let poly6 = floor(&(&a * &a), &(&b * &b));
     // ceil(a^2, b^2)
-    let poly7 = ceil(&(&b * &b), &(&a * &a));
+    let poly7 = ceil(&(&a * &a), &(&b * &b));
     // min(ab + 12, ab + a)
-    let poly8 = min(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+    let poly8 = min(&(&a * &b + 12), &(&a * &b + &a));
     // max (ab + 12, ab + a)
-    let poly9 = max(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+    let poly9 = max(&(&a * &b + 12), &(&a * &b + &a));
     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
-    let poly10 = max(&(&floor(&(&a *&a), &b) - 2), &(&ceil(&c, &b) + 1));
+    let poly10 = max(&(floor(&(&a * &a), &b) - 2), &(ceil(&c, &b) + 1));
 
     // Polynomial printing
     println!("{}", (0..50).map(|_| "=").collect::<String>());
-    println!("Displaying polynomials");
-    println!("{}", poly1);
-    println!("{}", poly2);
-    println!("{}", poly3);
-    println!("{}", poly4);
-    println!("{}", poly5);
-    println!("{}", poly6);
-    println!("{}", poly7);
-    println!("{}", poly8);
-    println!("{}", poly9);
-    println!("{}", poly10);
+    println!("Displaying polynomials (string representation = code representation):");
+    println!("{} = {}", poly1, poly1.to_code(&|x: String| x));
+    println!("{} = {}", poly2, poly2.to_code(&|x: String| x));
+    println!("{} = {}", poly3, poly3.to_code(&|x: String| x));
+    println!("{} = {}", poly4, poly4.to_code(&|x: String| x));
+    println!("{} = {}", poly5, poly5.to_code(&|x: String| x));
+    println!("{} = {}", poly6, poly6.to_code(&|x: String| x));
+    println!("{} = {}", poly7, poly7.to_code(&|x: String| x));
+    println!("{} = {}", poly8, poly8.to_code(&|x: String| x));
+    println!("{} = {}", poly9, poly9.to_code(&|x: String| x));
+    println!("{} = {}", poly10, poly10.to_code(&|x: String| x));
     println!("{}", (0..50).map(|_| "=").collect::<String>());
 
     // Polynomial evaluation
@@ -119,8 +119,8 @@ pub fn main() {
     values.insert("b".into(), 3);
     values.insert("c".into(), 8);
     let implicit_values = vec![(poly1.clone(), poly1.eval(&values).unwrap()),
-    (poly2.clone(), poly2.eval(&values).unwrap()),
-    (poly3.clone(), poly3.eval(&values).unwrap())];
+                               (poly2.clone(), poly2.eval(&values).unwrap()),
+                               (poly3.clone(), poly3.eval(&values).unwrap())];
     let deduced_values = deduce_values(&implicit_values).unwrap();
     println!("Deduced values:");
     println!("a = {} [Expected 5]", deduced_values["a"]);
@@ -138,9 +138,9 @@ Displaying polynomials (string representation = code representation):
 ab = a * b
 ab + ac + b + c = a * b + a * c + b + c
 a^2 - ab + 12 = a * a - a * b + 12
-2ac + 3a + 2bc + 3b + 2c + 3 = 2 * a * c + 3 * a + 2 * b * c + 3 * b + 2 * c + 3
-floor(b^2, a^2) = floor(b * b, a * a)
-ceil(b^2, a^2) = ceil(b * b, a * a)
+ac^2 + 3a + bc^2 + 3b + c^2 + 3 = a * c * c + 3 * a + b * c * c + 3 * b + c * c + 3
+floor(a^2, b^2) = floor(a * a, b * b)
+ceil(a^2, b^2) = ceil(a * a, b * b)
 min(ab + 12, ab + a) = min(a * b + 12, a * b + a)
 max(ab + 12, ab + a) = max(a * b + 12, a * b + a)
 max(floor(a^2, b) - 2, ceil(c, b) + 1) = max(floor(a * a, b) - 2, ceil(c, b) + 1)
@@ -150,9 +150,9 @@ Evaluating for a = 3, b = 2, c = 5.
 ab = 6 [Expected 6]
 ab + ac + b + c = 28 [Expected 28]
 a^2 - ab + 12 = 15 [Expected 15]
-2ac + 3a + 2bc + 3b + 2c + 3 = 78 [Expected 78]
-floor(b^2, a^2) = 0 [Expected 0]
-ceil(b^2, a^2) = 1 [Expected 1]
+ac^2 + 3a + bc^2 + 3b + c^2 + 3 = 168 [Expected 78]
+floor(a^2, b^2) = 2 [Expected 0]
+ceil(a^2, b^2) = 3 [Expected 1]
 min(ab + 12, ab + a) = 9 [Expected 9]
 max(ab + 12, ab + a) = 18 [Expected 18]
 max(floor(a^2, b) - 2, ceil(c, b) + 1) = 4 [Expected 4]

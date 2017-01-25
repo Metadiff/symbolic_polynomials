@@ -13,25 +13,25 @@ pub fn main() {
 
     // Build polynomials
     // 5b + 2
-    let poly1 = &(&b * 5) + 2;
+    let poly1 = 5 * &b + 2;
     // ab
     let poly2 = &a * &b;
     // ab + ac + b + c
-    let poly3 = &(&b + &c) * &(&a + 1);
+    let poly3 = &a * &b + &a * &c + &b + &c;
     // a^2 - ab + 12
-    let poly4 = &(&(&a * &a) - &(&a * &b)) + 12;
+    let poly4 = &a * &a - &a * &b + 12;
     // ac^2 + 3a + bc^2 + 3b + c^2 + 3
-    let poly5 = &(&(&a + &b) + 1) * &(&(&c * 2) + 3);
+    let poly5 = &a * &c * &c + 3 * &a + &b * &c * &c + 3 * &b + &c * &c + 3;
     // floor(a^2, b^2)
-    let poly6 = floor(&(&b * &b), &(&a * &a));
+    let poly6 = floor(&(&a * &a), &(&b * &b));
     // ceil(a^2, b^2)
-    let poly7 = ceil(&(&b * &b), &(&a * &a));
+    let poly7 = ceil(&(&a * &a), &(&b * &b));
     // min(ab + 12, ab + a)
-    let poly8 = min(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+    let poly8 = min(&(&a * &b + 12), &(&a * &b + &a));
     // max (ab + 12, ab + a)
-    let poly9 = max(&(&(&a * &b) + 12), &(&(&a * &b) + &a));
+    let poly9 = max(&(&a * &b + 12), &(&a * &b + &a));
     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
-    let poly10 = max(&(&floor(&(&a * &a), &b) - 2), &(&ceil(&c, &b) + 1));
+    let poly10 = max(&(floor(&(&a * &a), &b) - 2), &(ceil(&c, &b) + 1));
 
     // Polynomial printing
     println!("{}", (0..50).map(|_| "=").collect::<String>());
