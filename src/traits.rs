@@ -1,5 +1,5 @@
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign, Neg};
-use num::{Integer, One, Zero, Unsigned};
+use num::{Integer, CheckedDiv, One, Zero, Unsigned};
 
 /// A trait specifying all the bounds an `Id` type should meet.
 ///
@@ -21,10 +21,10 @@ impl<T> Power for T
 /// A trait specifying all the bounds a `Coefficient` type should meet.
 ///
 /// See the module-level documentation for more.
-pub trait Coefficient: Integer + One + ::num::ToPrimitive + ::num::FromPrimitive +
+pub trait Coefficient: Integer + One + ::num::ToPrimitive + ::num::FromPrimitive + CheckedDiv +
 AddAssign<Self> + SubAssign<Self> + MulAssign<Self> + DivAssign<Self> + Neg<Output=Self> +
 Clone + ::std::fmt::Display + ::std::fmt::Debug {}
 
 impl<T> Coefficient for T where T: Integer + One + ::num::ToPrimitive + ::num::FromPrimitive +
-AddAssign<T> + SubAssign<T> + MulAssign<T> + DivAssign<T> + Neg<Output=T> +
+CheckedDiv + AddAssign<T> + SubAssign<T> + MulAssign<T> + DivAssign<T> + Neg<Output=T> +
 Clone + ::std::fmt::Display + ::std::fmt::Debug {}

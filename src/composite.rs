@@ -2,8 +2,8 @@ use std::cmp::{Ord, Ordering};
 use traits::*;
 use polynomial::Polynomial;
 
-
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 /// A composite expression (tagged union) of a variable or an irreducible function (floor, ceil, max, min)
 pub enum Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {

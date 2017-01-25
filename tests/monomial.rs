@@ -2,7 +2,9 @@ extern crate symbolic_polynomials;
 use symbolic_polynomials::*;
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 type TestMonomial = Monomial<String, i64, u8>;
+#[allow(dead_code)]
 type TestPolynomial = Polynomial<String, i64, u8>;
 
 #[test]
@@ -158,7 +160,7 @@ pub fn mul_test() {
         powers: vec![(Composite::Variable("c".into()), 1)],
     };
     // 2abc
-    let abc_times_2 = &(2 * &a) * &(&b * &c);
+    let abc_times_2 = 2 * &a * &b * &c;
     // b^2
     let b_square = &b * &b;
     // 2ab^3c
@@ -206,7 +208,7 @@ pub fn div_test() {
     // c^2
     let c_square = &c * &c;
     // 2abc
-    let abc_times_2 = &(2 * &a) * &(&b * &c);
+    let abc_times_2 = 2 * &a * &b * &c;
     // ab
     let ab = &a * &b;
     // ac
@@ -295,7 +297,7 @@ pub fn add_test() {
     assert!(a_plus_b_twice.monomials[1] == 2 * &b);
 
     // 0
-    let zero = &a_plus_b + &(-&a_plus_b);
+    let zero = &a_plus_b - &a_plus_b;
     assert!(zero.monomials.len() == 0);
 }
 
@@ -323,7 +325,7 @@ pub fn sub_test() {
     assert!(a_minus_two_b.monomials[1] == -2 * &b);
 
     // a
-    let a_v2 = &a_minus_two_b + &(2 * &b);
+    let a_v2 = &a_minus_two_b + 2 * &b;
     assert!(a_v2.monomials.len() == 1);
     assert!(a_v2.monomials[0] == a);
 
@@ -361,11 +363,11 @@ pub fn eval_test() {
     assert!(c.eval(&values) == Ok(5));
     assert!(d.eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 
-    assert!((&a * &(2 * &a)).eval(&values) == Ok(18));
-    assert!((&a * &(2 * &b)).eval(&values) == Ok(42));
-    assert!((&c * &(&a * &b)).eval(&values) == Ok(105));
-    assert!((&(&d * &c) * &(&a * &b)).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
+    assert!((&a * 2 * &a).eval(&values) == Ok(18));
+    assert!((&a * 2 * &b).eval(&values) == Ok(42));
+    assert!((&c * &a * &b).eval(&values) == Ok(105));
+    assert!((&d * &c * &a * &b).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 
-    assert!((&(&a + &b) + &(&c + 2)).eval(&values) == Ok(17));
-    assert!((&(&a + &b) + &(&c + &d)).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
+    assert!((&a + &b + &c + 2).eval(&values) == Ok(17));
+    assert!((&a + &b + &c + &d).eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 }

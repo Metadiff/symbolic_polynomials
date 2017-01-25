@@ -2,7 +2,9 @@ use std::collections::HashMap;
 extern crate symbolic_polynomials;
 use symbolic_polynomials::*;
 
+#[allow(dead_code)]
 type TestMonomial = Monomial<String, i64, u8>;
+#[allow(dead_code)]
 type TestPolynomial = Polynomial<String, i64, u8>;
 
 #[test]
@@ -52,7 +54,7 @@ pub fn partial_eq_test() {
     // b^2
     let b_square = &b * &b;
     // a^2 + b^2 + 2ab = (a + b)^2
-    let a_plus_b_square = &(&a_square + &b_square) + &(2 * &ab);
+    let a_plus_b_square = &a_square + &b_square + 2 * &ab;
 
     assert!(a != 1 && 1 != a);
     assert!(b != 1 && 1 != b);
@@ -77,7 +79,7 @@ pub fn ord_test() {
     // b^2
     let b_square = &b * &b;
     // a^2b
-    let a_square_b = &(&a * &a) * &b;
+    let a_square_b = &a * &a * &b;
     // a^2b + a
     let a_square_b_plus_a = &a_square_b + &a;
     // a^2b + b
@@ -117,9 +119,9 @@ pub fn mul_test() {
     let a: TestPolynomial = variable("a".into());
     let b: TestPolynomial = variable("b".into());
     // ab + a^2 + 1
-    let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
+    let ab_plus_a_square_plus_one = &a * &b + &a * &a + 1;
     // ab + b^2 + 1
-    let ab_plus_b_square_plus_two = &(&(&a * &b) + &(&b * &b)) + 2;
+    let ab_plus_b_square_plus_two = &a * &b + &b * &b + 2;
     // a^3b + 2a^2b^2 + 2a^2 + ab^3 + 3ab + b^2 + 2
     let product = &ab_plus_a_square_plus_one * &ab_plus_b_square_plus_two;
 
@@ -149,9 +151,9 @@ pub fn div_test() {
     let a: TestPolynomial = variable("a".into());
     let b: TestPolynomial = variable("b".into());
     // ab + a^2 + 1
-    let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
+    let ab_plus_a_square_plus_one = &a * &b + &a * &a + 1;
     // ab + b^2 + 1
-    let ab_plus_b_square_plus_two = &(&(&a * &b) + &(&b * &b)) + 2;
+    let ab_plus_b_square_plus_two = &a * &b + &b * &b + 2;
     // a^3b + 2a^2b^2 + 2a^2 + ab^3 + 3ab + b^2 + 2
     let product = &ab_plus_a_square_plus_one * &ab_plus_b_square_plus_two;
     // (ab + a^2 + 1) = a * (a + b) + 1
@@ -177,8 +179,8 @@ pub fn add_test() {
     let a: TestPolynomial = variable("a".into());
     let b: TestPolynomial = variable("b".into());
     // a + b + 1
-    let a_plus_b_plus_1_v1 = &(&a + &b) + 1;
-    let a_plus_b_plus_1_v2 = &(&a_mon + &b) + 1;
+    let a_plus_b_plus_1_v1 = &a + &b + 1;
+    let a_plus_b_plus_1_v2 = &a_mon + &b + 1;
     // 2a + 2b + 2
     let a_plus_b_plus_1_times_2 = &a_plus_b_plus_1_v1 + &a_plus_b_plus_1_v2;
 
@@ -205,7 +207,7 @@ pub fn sub_test() {
     let a: TestPolynomial = variable("a".into());
     let b: TestPolynomial = variable("b".into());
     // a + b + 1
-    let a_plus_b_plus_1 = &(&a + &b) + 1;
+    let a_plus_b_plus_1 = &a + &b + 1;
     // 2a + 2b + 2
     let a_plus_b_plus_1_times_2 = 2 * &a_plus_b_plus_1;
 
@@ -229,19 +231,19 @@ pub fn eval_test() {
     values.insert("c".into(), 5);
 
     // a + b + 1
-    let a_plus_b_plus_1 = &(&a + &b) + 1;
+    let a_plus_b_plus_1 = &a + &b + 1;
     assert!(a_plus_b_plus_1.eval(&values) == Ok(11));
 
     // ab + a^2 + 1
-    let ab_plus_a_square_plus_one = &(&(&a * &b) + &(&a * &a)) + 1;
+    let ab_plus_a_square_plus_one = &a * &b + &a * &a + 1;
     assert!(ab_plus_a_square_plus_one.eval(&values) == Ok(31));
 
     // a + b + c + 1
-    let a_plus_b_plus_c_plus_1 = &(&a + &b) + &(&c + 1);
+    let a_plus_b_plus_c_plus_1 = &a + &b + &c + 1;
     assert!(a_plus_b_plus_c_plus_1.eval(&values) == Ok(16));
 
     // ab + bc + cd
-    let ab_plus_bc_plus_cd = &(&b * &(&a + &c)) + &(&d + &c);
+    let ab_plus_bc_plus_cd = &a * &b * &b + &c + &c + &d;
     assert!(ab_plus_bc_plus_cd.eval(&values) == Err(("d".into(), "Value not provided for d.".into())));
 
     // a^3 + 2a^2b + a^2c + a^2 + a b^2 + abc + ab + a + b + c + 1 =

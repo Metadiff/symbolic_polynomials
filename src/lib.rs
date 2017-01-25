@@ -111,6 +111,10 @@
 //! The polynomials are used in `Metadiff` for modeling the shapes of tensors.
 //! A small example of how this can be achieved is shown
 //! [here](https://gist.github.com/botev/bac770e32f7df341ce18562f5333e5e5).
+#![feature(custom_derive)]
+#[cfg(feature = "serialize")]
+#[macro_use]
+extern crate serde_derive;
 
 extern crate num;
 
