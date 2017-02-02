@@ -8,17 +8,17 @@ homepage = "http://Metadiff.github.io/symbolic_polynomials"
 repository = "https://github.com/Metadiff/symbolic_polynomials"
 readme = "README.md"
 keywords = ["math", "symbolic", "polynomials"]
-license = "Apache-2.0"
+license = "MIT/Apache-2.0"
 exclude = [ "examples/*" ]
 
 [features]
-default = []
+default = ["serialize"]
 serialize = ["serde", "serde_derive"]
 
 [dependencies]
 num = { version = "0.1.36" }
-serde = { version = "0.8.23", optional = true }
-serde_derive = { version = "0.8.23", optional = true }
+serde = { version = "0.9.5", optional = true }
+serde_derive = { version = "0.9.5", optional = true }
 
 [lib]
 name = "symbolic_polynomials"

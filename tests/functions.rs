@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use std::collections::HashMap;
+use std::collections::{HashSet, HashMap};
 extern crate symbolic_polynomials;
 extern crate num;
 use symbolic_polynomials::*;
@@ -138,6 +138,49 @@ pub fn floor_test() {
 }
 
 #[test]
+pub fn unique_identifiers_test() {
+    let thirteen = TestPolynomial::from(13);
+    let three = TestPolynomial::from(3);
+    let four = floor(&thirteen, &three);
+    let a: TestPolynomial = variable("a".into());
+    let b: TestPolynomial = variable("b".into());
+    let a_square = &a * &a;
+    let a_third = &a_square * &a;
+    let floor_a_square_b = floor(&a_square, &b);
+    let floor_a_third_b = floor(&a_third, &b);
+
+    let mut set = HashSet::new();
+    thirteen.unique_identifiers(&mut set);
+    assert!(set.len() == 0);
+    three.unique_identifiers(&mut set);
+    assert!(set.len() == 0);
+    four.unique_identifiers(&mut set);
+    assert!(set.len() == 0);
+
+    a.unique_identifiers(&mut set);
+    assert!(set.len() == 1);
+    a_square.unique_identifiers(&mut set);
+    assert!(set.len() == 1);
+    a_third.unique_identifiers(&mut set);
+    assert!(set.len() == 1);
+
+    b.unique_identifiers(&mut set);
+    assert!(set.len() == 2);
+    floor_a_square_b.unique_identifiers(&mut set);
+    assert!(set.len() == 2);
+    floor_a_third_b.unique_identifiers(&mut set);
+    assert!(set.len() == 2);
+
+    set.clear();
+    floor_a_square_b.unique_identifiers(&mut set);
+    assert!(set.len() == 2);
+
+    set.clear();
+    floor_a_third_b.unique_identifiers(&mut set);
+    assert!(set.len() == 2);
+}
+
+#[test]
 pub fn deduce_values_test1() {
     let a: TestPolynomial = variable("a".into());
     let b: TestPolynomial = variable("b".into());
@@ -181,8 +224,8 @@ pub fn deduce_values_test2() {
     let mut implicit_values = Vec::<(TestPolynomial, i64)>::new();
 
     // abc^2 + abc + 1
-    let poly1 = &a * &b * &c * (&c + 1 ) + 1;
-    let val1 = a_val * b_val * c_val * (c_val + 1 ) + 1;
+    let poly1 = &a * &b * &c * (&c + 1) + 1;
+    let val1 = a_val * b_val * c_val * (c_val + 1) + 1;
     implicit_values.push((poly1.clone(), val1));
     // a^2 + c^2 + 2
     let poly2 = &a * &a + &c * &c + 2;
@@ -255,10 +298,9 @@ pub fn deduce_values_test_floor_min() {
     let val2 = 2 * a_val * b_val + 1;
     implicit_values.push((poly2.clone(), val2));
     // 5a^2b^2c^2 + floor(ab^2, 2) + min(a^2, b^2) + 3
-    let poly3 = 5 * &a * &a * &b * &b * &c * &c + floor(&(&a * &b * &b), &2.into()) +
-        min(&(&a * &a), &(&b * &b)) + 3;
+    let poly3 = 5 * &a * &a * &b * &b * &c * &c + floor(&(&a * &b * &b), &2.into()) + min(&(&a * &a), &(&b * &b)) + 3;
     let val3 = 5 * a_val * a_val * b_val * b_val * c_val * c_val + (a_val * b_val * b_val).div_floor(&2) +
-        ::std::cmp::min(a_val * a_val, b_val * b_val) + 3;
+               ::std::cmp::min(a_val * a_val, b_val * b_val) + 3;
     implicit_values.push((poly3.clone(), val3));
     let values = deduce_values(&implicit_values).unwrap();
 
@@ -326,10 +368,9 @@ pub fn deduce_values_test_all() {
     let val2 = a_val * a_val * a_val + (b_val * b_val * b_val).div_floor(&3) - 10 - ::std::cmp::min(b_val * b_val, 17);
     implicit_values.push((poly2.clone(), val2));
     // ceil(7ab, 5) + ac + bc + 3 + max(ab - 5, a + 2b)
-    let poly3 = ceil(&(7 * &a * &b), &5.into()) + &a * &c + &b * &c + 3 +
-        max(&(&a * &b - 5), &(&a + 2 * &b)) ;
+    let poly3 = ceil(&(7 * &a * &b), &5.into()) + &a * &c + &b * &c + 3 + max(&(&a * &b - 5), &(&a + 2 * &b));
     let mut val3 = (7 * a_val * b_val).div_floor(&5) + a_val * c_val + b_val * c_val + 3 +
-        ::std::cmp::max(a_val * b_val - 5, a_val + 2 * b_val);
+                   ::std::cmp::max(a_val * b_val - 5, a_val + 2 * b_val);
     if 7 * a_val * b_val % 5 != 0 {
         val3 += 1;
     }

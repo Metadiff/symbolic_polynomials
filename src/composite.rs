@@ -1,10 +1,12 @@
 use std::cmp::{Ord, Ordering};
+use std::collections::{HashMap, HashSet};
+
 use traits::*;
 use polynomial::Polynomial;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
-/// A composite expression (tagged union) of a variable or an irreducible function (floor, ceil, max, min)
+/// A composite expression (tagged union) of a variable or an irreducible function (floor, ceil, max, min).
 pub enum Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {
     Variable(I),
@@ -16,8 +18,8 @@ pub enum Composite<I, C, P>
 
 impl<I, C, P> Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    /// Evaluates the `Composite` given the provided mapping of identifier to value assignment.
-    pub fn eval(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, (I, String)> {
+    /// Evaluates the `Composite` given the provided mapping of identifiers to value assignments.
+    pub fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)> {
         match *self {
             Composite::Variable(ref x) => {
                 values.get(x)
@@ -61,7 +63,7 @@ impl<I, C, P> Composite<I, C, P>
     }
 
     /// Returns a code equivalent string representation of the `Composite`.
-    /// The `format` specifies a function how to render the identifiers;
+    /// The `format` specifies a function how to render the identifiers.
     pub fn to_code<F>(&self, format: &F) -> String
         where F: ::std::ops::Fn(I) -> String {
         let mut str: String = "".into();
@@ -86,12 +88,28 @@ impl<I, C, P> Composite<I, C, P>
         }
         str
     }
+
+    /// Fills into the `HashSet` all of the identifiers used in this `Composite`.
+    pub fn unique_identifiers(&self, unique: &mut HashSet<I>) {
+        match *self {
+            Composite::Variable(ref id) => {
+                unique.insert(id.clone());
+            }
+            Composite::Floor(ref x, ref y) |
+            Composite::Ceil(ref x, ref y) |
+            Composite::Max(ref x, ref y) |
+            Composite::Min(ref x, ref y) => {
+                x.unique_identifiers(unique);
+                y.unique_identifiers(unique);
+            }
+        }
+    }
 }
 
 
 impl<I, C, P> ::std::fmt::Display for Composite<I, C, P>
     where I: Id, C: Coefficient, P: Power {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         match *self {
             Composite::Variable(ref id) => write!(f, "{}", id),
             Composite::Floor(ref x, ref y) => write!(f, "floor({}, {})", x, y),

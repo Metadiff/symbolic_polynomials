@@ -181,5 +181,5 @@ macro_rules! impl_all {
     )*};
 }
 
-//impl_all!(i64, u64, i32, u32, i16, u16, i8, u8, usize);
+// impl_all!(i64, u64, i32, u32, i16, u16, i8, u8, usize);
 impl_all!(i64);

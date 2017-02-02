@@ -226,24 +226,32 @@ pub fn reduce<I, C, P>(polynomial: &Polynomial<I, C, P>, values: &HashMap<I, C>)
 
 /// Automatically deduces the individual variable assignments based on the
 /// system of equations specified by the mapping of `Polynomial` to a constant value.
-pub fn deduce_values<I, C, P>(original_values: &Vec<(Polynomial<I, C, P>, C)>) -> Result<HashMap<I, C>, String>
+pub fn deduce_values<I, C, P>(original_values: &[(Polynomial<I, C, P>, C)]) -> Result<HashMap<I, C>, String>
     where I: Id, C: Coefficient, P: Power {
-    let mut implicit_values = original_values.clone();
-    let mut indexes: Vec<usize> = (0..original_values.len()).collect();
+    //    let mut implicit_values = vec![(Polynomial::default(), C::zero()); original_values.len()];
+    let mut implicit_values = vec![(C::zero().into(), C::zero()); original_values.len()];
+    implicit_values.clone_from_slice(original_values);
+    let mut verifyied = vec![false; original_values.len()];
+    //    let mut indexes: Vec<usize> = (0..original_values.len()).collect();
     let mut values: HashMap<I, C> = HashMap::new();
     let mut i = 0;
     while i < implicit_values.len() {
-        let (to_remove, to_reduce) = {
+        if verifyied[i] {
+            i += 1;
+            continue;
+        }
+        let to_reduce = {
             let (ref p, ref c) = implicit_values[i];
             if p.is_constant() {
                 let value = p.eval(&HashMap::new()).unwrap();
                 if value != *c {
                     return Err(format!("Value deduction failed for {} = {}, as it was deduced to {}.",
-                                       original_values[indexes[i]].0,
+                                       original_values[i].0,
                                        c,
                                        value));
                 } else {
-                    (true, false)
+                    verifyied[i] = true;
+                    false
                 }
             } else if (p.monomials.len() == 1 || (p.monomials.len() == 2 && p.monomials[1].is_constant())) &&
                       p.monomials[0].powers.len() == 1 {
@@ -264,31 +272,37 @@ pub fn deduce_values<I, C, P>(original_values: &Vec<(Polynomial<I, C, P>, C)>) -
                         }
                     };
                     values.insert(id.clone(), inferred);
-                    (true, true)
+                    verifyied[i] = true;
+                    true
                 } else {
-                    (false, false)
+                    false
                 }
             } else {
-                (false, false)
+                false
             }
         };
-        if to_remove {
-            implicit_values.remove(i);
-            indexes.remove(i);
-            if implicit_values.is_empty() {
-                return Ok(values);
-            }
-        }
+        //        if to_remove {
+        //            implicit_values.remove(i);
+        //            indexes.remove(i);
+        //            if implicit_values.is_empty() {
+        //                return Ok(values);
+        //            }
+        //        }
         if to_reduce {
             for &mut (ref mut p, _) in &mut implicit_values {
                 *p = reduce(p, &values);
             }
             i = 0;
-        } else if !to_remove {
+        } else {
             i += 1;
         }
     }
-    Err("Could not deduce all variables.".into())
+    if !verifyied.iter().fold(true, |all, &x| all && x) {
+        Err("Could not deduce all variables.".into())
+    } else {
+        Ok(values)
+    }
+
 }
 
 fn nth_root<C, P>(value: C, n: P) -> Option<C>

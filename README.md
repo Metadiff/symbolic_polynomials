@@ -1,7 +1,7 @@
 # Symbolic Polynomials
 [![Build Status](https://travis-ci.org/Metadiff/symbolic_polynomials.svg?branch=master)](https://travis-ci.org/Metadiff/symbolic_polynomials)
 [![Documentation](https://img.shields.io/badge/doc-master-brightgreen.svg)](https://Metadiff.github.io/symbolic_polynomials)
-[![License](https://img.shields.io/badge/Licence-Apache2.0-blue.svg)](./LICENSE)
+[![License](https://img.shields.io/badge/Licence-Apache2.0-blue.svg)](LICENSE-APACHE)
 [![Cargo](http://meritbadge.herokuapp.com/symbolic_polynomials)](https://crates.io/crates/symbolic_polynomials)
 
 A Rust library for manipulation and evaluation of symbolic integer polynomials.
@@ -175,8 +175,7 @@ algorithm would probably use
 [Grobner basis](https://en.wikipedia.org/wiki/Gr%C3%B6bner_basis).
 
 ## License
-The project is distrusted under the Apache 2.0 License.
+Symbolic Polynomials is distributed under the terms of both the MIT license and the
+Apache License (Version 2.0). See [LICENSE-APACHE](LICENSE-APACHE) and
+[LICENSE-MIT](LICENSE-MIT) for details.
 
-## Contributing
-If you want to contribute in any way please make an Issue or submit a PR
-request describing its functionality.
