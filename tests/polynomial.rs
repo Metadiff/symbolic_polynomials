@@ -250,11 +250,11 @@ pub fn eval_test() {
     let product = &ab_plus_a_square_plus_one * &a_plus_b_plus_c_plus_1;
     assert!(product.eval(&values) == Ok(496));
 
-    assert!(floor(&product, &3.into()).eval(&values) == Ok(165));
-    assert!(ceil(&product, &3.into()).eval(&values) == Ok(166));
+    assert!(floor(&product, TestPolynomial::from(3)).eval(&values) == Ok(165));
+    assert!(ceil(&product, TestPolynomial::from(3)).eval(&values) == Ok(166));
 
-    assert!(floor(&product, &16.into()).eval(&values) == Ok(31));
-    assert!(ceil(&product, &16.into()).eval(&values) == Ok(31));
+    assert!(floor(&product, TestPolynomial::from(16)).eval(&values) == Ok(31));
+    assert!(ceil(&product, TestPolynomial::from(16)).eval(&values) == Ok(31));
 
     assert!(floor(&product, &a).eval(&values) == Ok(165));
     assert!(ceil(&product, &a).eval(&values) == Ok(166));

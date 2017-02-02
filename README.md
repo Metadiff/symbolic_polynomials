@@ -72,15 +72,15 @@ pub fn main() {
     // ac^2 + 3a + bc^2 + 3b + c^2 + 3
     let poly5 = &a * &c * &c + 3 * &a + &b * &c * &c + 3 * &b + &c * &c + 3;
     // floor(a^2, b^2)
-    let poly6 = floor(&(&a * &a), &(&b * &b));
+    let poly6 = floor(&a * &a, &b * &b);
     // ceil(a^2, b^2)
-    let poly7 = ceil(&(&a * &a), &(&b * &b));
+    let poly7 = ceil(&a * &a, &b * &b);
     // min(ab + 12, ab + a)
-    let poly8 = min(&(&a * &b + 12), &(&a * &b + &a));
+    let poly8 = min(&a * &b + 12, &a * &b + &a);
     // max (ab + 12, ab + a)
-    let poly9 = max(&(&a * &b + 12), &(&a * &b + &a));
+    let poly9 = max(&a * &b + 12, &a * &b + &a);
     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
-    let poly10 = max(&(floor(&(&a * &a), &b) - 2), &(ceil(&c, &b) + 1));
+    let poly10 = max(floor(&a * &a, &b) - 2, ceil(&c, &b) + 1);
 
     // Polynomial printing
     println!("{}", (0..50).map(|_| "=").collect::<String>());
@@ -119,9 +119,9 @@ pub fn main() {
     values.insert("a".into(), 5);
     values.insert("b".into(), 3);
     values.insert("c".into(), 8);
-    let implicit_values = vec![(poly1.clone(), poly1.eval(&values).unwrap()),
-                               (poly2.clone(), poly2.eval(&values).unwrap()),
-                               (poly3.clone(), poly3.eval(&values).unwrap())];
+    let implicit_values = vec![(&poly1, poly1.eval(&values).unwrap()),
+                               (&poly2, poly2.eval(&values).unwrap()),
+                               (&poly3, poly3.eval(&values).unwrap())];
     let deduced_values = deduce_values(&implicit_values).unwrap();
     println!("Deduced values:");
     println!("a = {} [Expected 5]", deduced_values["a"]);

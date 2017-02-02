@@ -2,7 +2,8 @@ use traits::*;
 use monomial::Monomial;
 use polynomial::Polynomial;
 use composite::Composite;
-use ::std::collections::HashMap;
+use std::collections::HashMap;
+use std::convert::AsRef;
 
 /// Returns a polynomial representing 1 * x^1 + 0,
 /// where 'x' is a variable uniquely identifiable by the provided `id`.
@@ -17,8 +18,10 @@ pub fn variable<I, C, P>(id: I) -> Polynomial<I, C, P>
 }
 
 /// Computes a symbolic `max` between two polynomials.
-pub fn max<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn max<I, C, P, T1, T2>(left: T1, right: T2) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T1: AsRef<Polynomial<I, C, P>>, T2: AsRef<Polynomial<I, C, P>> {
+    let left = left.as_ref();
+    let right = right.as_ref();
     if left.is_constant() && right.is_constant() {
         let v1 = left.eval(&HashMap::default()).ok().unwrap();
         let v2 = right.eval(&HashMap::default()).ok().unwrap();
@@ -36,8 +39,10 @@ pub fn max<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> 
 }
 
 /// Computes a symbolic `min` between two polynomials.
-pub fn min<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn min<I, C, P, T1, T2>(left: T1, right: T2) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T1: AsRef<Polynomial<I, C, P>>, T2: AsRef<Polynomial<I, C, P>> {
+    let left = left.as_ref();
+    let right = right.as_ref();
     if left.is_constant() && right.is_constant() {
         let v1 = left.eval(&HashMap::default()).ok().unwrap();
         let v2 = right.eval(&HashMap::default()).ok().unwrap();
@@ -55,8 +60,10 @@ pub fn min<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> 
 }
 
 /// Computes a symbolic `ceil` between two polynomials.
-pub fn ceil<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn ceil<I, C, P, T1, T2>(left: T1, right: T2) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T1: AsRef<Polynomial<I, C, P>>, T2: AsRef<Polynomial<I, C, P>> {
+    let left = left.as_ref();
+    let right = right.as_ref();
     if left.is_constant() && right.is_constant() {
         let v1 = left.eval(&HashMap::default()).ok().unwrap();
         let v2 = right.eval(&HashMap::default()).ok().unwrap();
@@ -84,8 +91,10 @@ pub fn ceil<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) ->
 }
 
 /// Computes a symbolic `floor` between two polynomials.
-pub fn floor<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn floor<I, C, P, T1, T2>(left: T1, right: T2) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T1: AsRef<Polynomial<I, C, P>>, T2: AsRef<Polynomial<I, C, P>> {
+    let left = left.as_ref();
+    let right = right.as_ref();
     if left.is_constant() && right.is_constant() {
         let v1 = left.eval(&HashMap::default()).ok().unwrap();
         let v2 = right.eval(&HashMap::default()).ok().unwrap();
@@ -108,8 +117,9 @@ pub fn floor<I, C, P>(left: &Polynomial<I, C, P>, right: &Polynomial<I, C, P>) -
 }
 
 /// Reduces the monomial, given the variable assignments provided.
-pub fn reduce_monomial<I, C, P>(monomial: &Monomial<I, C, P>, values: &HashMap<I, C>) -> Monomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn reduce_monomial<I, C, P, T>(monomial: T, values: &HashMap<I, C>) -> Monomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T: AsRef<Monomial<I, C, P>> {
+    let monomial = monomial.as_ref();
     if monomial.is_constant() {
         monomial.clone()
     } else {
@@ -215,8 +225,9 @@ pub fn reduce_monomial<I, C, P>(monomial: &Monomial<I, C, P>, values: &HashMap<I
 }
 
 /// Reduces the polynomial, given the variable assignments provided.
-pub fn reduce<I, C, P>(polynomial: &Polynomial<I, C, P>, values: &HashMap<I, C>) -> Polynomial<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+pub fn reduce<I, C, P, T>(polynomial: T, values: &HashMap<I, C>) -> Polynomial<I, C, P>
+    where I: Id, C: Coefficient, P: Power, T: AsRef<Polynomial<I, C, P>> {
+    let polynomial = polynomial.as_ref();
     let mut result = Polynomial::<I, C, P> { monomials: Vec::new() };
     for m in &polynomial.monomials {
         result += &reduce_monomial(m, values);
@@ -226,17 +237,18 @@ pub fn reduce<I, C, P>(polynomial: &Polynomial<I, C, P>, values: &HashMap<I, C>)
 
 /// Automatically deduces the individual variable assignments based on the
 /// system of equations specified by the mapping of `Polynomial` to a constant value.
-pub fn deduce_values<I, C, P>(original_values: &[(Polynomial<I, C, P>, C)]) -> Result<HashMap<I, C>, String>
-    where I: Id, C: Coefficient, P: Power {
+pub fn deduce_values<I, C, P, T>(original_values: &[(T, C)]) -> Result<HashMap<I, C>, String>
+    where I: Id, C: Coefficient, P: Power, T: AsRef<Polynomial<I, C, P>> {
     //    let mut implicit_values = vec![(Polynomial::default(), C::zero()); original_values.len()];
-    let mut implicit_values = vec![(C::zero().into(), C::zero()); original_values.len()];
-    implicit_values.clone_from_slice(original_values);
-    let mut verifyied = vec![false; original_values.len()];
+    let mut implicit_values = original_values.iter()
+        .map(|&(ref p, ref c)| (p.as_ref().clone(), c.clone()))
+        .collect::<Vec<(Polynomial<I, C, P>, C)>>();
+    let mut verified = vec![false; original_values.len()];
     //    let mut indexes: Vec<usize> = (0..original_values.len()).collect();
     let mut values: HashMap<I, C> = HashMap::new();
     let mut i = 0;
     while i < implicit_values.len() {
-        if verifyied[i] {
+        if verified[i] {
             i += 1;
             continue;
         }
@@ -246,11 +258,11 @@ pub fn deduce_values<I, C, P>(original_values: &[(Polynomial<I, C, P>, C)]) -> R
                 let value = p.eval(&HashMap::new()).unwrap();
                 if value != *c {
                     return Err(format!("Value deduction failed for {} = {}, as it was deduced to {}.",
-                                       original_values[i].0,
+                                       original_values[i].0.as_ref(),
                                        c,
                                        value));
                 } else {
-                    verifyied[i] = true;
+                    verified[i] = true;
                     false
                 }
             } else if (p.monomials.len() == 1 || (p.monomials.len() == 2 && p.monomials[1].is_constant())) &&
@@ -272,7 +284,7 @@ pub fn deduce_values<I, C, P>(original_values: &[(Polynomial<I, C, P>, C)]) -> R
                         }
                     };
                     values.insert(id.clone(), inferred);
-                    verifyied[i] = true;
+                    verified[i] = true;
                     true
                 } else {
                     false
@@ -290,14 +302,14 @@ pub fn deduce_values<I, C, P>(original_values: &[(Polynomial<I, C, P>, C)]) -> R
         //        }
         if to_reduce {
             for &mut (ref mut p, _) in &mut implicit_values {
-                *p = reduce(p, &values);
+                *p = reduce(&p, &values);
             }
             i = 0;
         } else {
             i += 1;
         }
     }
-    if !verifyied.iter().fold(true, |all, &x| all && x) {
+    if !verified.iter().fold(true, |all, &x| all && x) {
         Err("Could not deduce all variables.".into())
     } else {
         Ok(values)
