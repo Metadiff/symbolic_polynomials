@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/Metadiff/symbolic_polynomials.svg?branch=master)](https://travis-ci.org/Metadiff/symbolic_polynomials)
 [![Documentation](https://img.shields.io/badge/doc-master-brightgreen.svg)](https://Metadiff.github.io/symbolic_polynomials)
 [![License](https://img.shields.io/badge/Licence-Apache2.0-blue.svg)](LICENSE-APACHE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE-MIT)
 [![Cargo](http://meritbadge.herokuapp.com/symbolic_polynomials)](https://crates.io/crates/symbolic_polynomials)
 
 A Rust library for manipulation and evaluation of symbolic integer polynomials.
