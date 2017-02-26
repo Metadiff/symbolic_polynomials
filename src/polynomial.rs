@@ -8,6 +8,7 @@ use monomial::Monomial;
 
 #[derive(Clone, Default, Debug, Eq)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "repr_c", repr(C))]
 /// A symbolic polynomial represented as  `m_1` + `m_2` + ... + `m_n`.
 pub struct Polynomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {

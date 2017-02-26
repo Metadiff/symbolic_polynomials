@@ -9,6 +9,7 @@ use composite::Composite;
 
 #[derive(Clone, Default, Debug, Eq)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "repr_c", repr(C))]
 /// A symbolic monomial represented as  C * `a_1`^`p_1` * `a_2`^`p_2` * ... * `a_n`^`p_n`.
 pub struct Monomial<I, C, P>
     where I: Id, C: Coefficient, P: Power {

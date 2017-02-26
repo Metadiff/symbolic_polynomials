@@ -14,6 +14,7 @@ exclude = [ "examples/*" ]
 [features]
 default = ["serialize"]
 serialize = ["serde", "serde_derive"]
+repr_c = []
 
 [dependencies]
 num = { version = "0.1.36" }
@@ -24,3 +25,7 @@ serde_derive = { version = "0.9.5", optional = true }
 name = "symbolic_polynomials"
 path = "src/lib.rs"
 doctest = true
+
+[[example]]
+name = "demo"
+path = "examples/demo.rs"
