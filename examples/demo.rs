@@ -58,9 +58,9 @@ pub fn main() {
     println!("{} = {} [Expected 6]", poly2, poly2.eval(&values).unwrap());
     println!("{} = {} [Expected 28]", poly3, poly3.eval(&values).unwrap());
     println!("{} = {} [Expected 15]", poly4, poly4.eval(&values).unwrap());
-    println!("{} = {} [Expected 78]", poly5, poly5.eval(&values).unwrap());
-    println!("{} = {} [Expected 0]", poly6, poly6.eval(&values).unwrap());
-    println!("{} = {} [Expected 1]", poly7, poly7.eval(&values).unwrap());
+    println!("{} = {} [Expected 168]", poly5, poly5.eval(&values).unwrap());
+    println!("{} = {} [Expected 2]", poly6, poly6.eval(&values).unwrap());
+    println!("{} = {} [Expected 3]", poly7, poly7.eval(&values).unwrap());
     println!("{} = {} [Expected 9]", poly8, poly8.eval(&values).unwrap());
     println!("{} = {} [Expected 18]", poly9, poly9.eval(&values).unwrap());
     println!("{} = {} [Expected 4]", poly10, poly10.eval(&values).unwrap());

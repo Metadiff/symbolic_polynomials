@@ -107,9 +107,9 @@ pub fn main() {
     println!("{} = {} [Expected 6]", poly2, poly2.eval(&values).unwrap());
     println!("{} = {} [Expected 28]", poly3, poly3.eval(&values).unwrap());
     println!("{} = {} [Expected 15]", poly4, poly4.eval(&values).unwrap());
-    println!("{} = {} [Expected 78]", poly5, poly5.eval(&values).unwrap());
-    println!("{} = {} [Expected 0]", poly6, poly6.eval(&values).unwrap());
-    println!("{} = {} [Expected 1]", poly7, poly7.eval(&values).unwrap());
+    println!("{} = {} [Expected 168]", poly5, poly5.eval(&values).unwrap());
+    println!("{} = {} [Expected 2]", poly6, poly6.eval(&values).unwrap());
+    println!("{} = {} [Expected 3]", poly7, poly7.eval(&values).unwrap());
     println!("{} = {} [Expected 9]", poly8, poly8.eval(&values).unwrap());
     println!("{} = {} [Expected 18]", poly9, poly9.eval(&values).unwrap());
     println!("{} = {} [Expected 4]", poly10, poly10.eval(&values).unwrap());
@@ -151,9 +151,9 @@ Evaluating for a = 3, b = 2, c = 5.
 ab = 6 [Expected 6]
 ab + ac + b + c = 28 [Expected 28]
 a^2 - ab + 12 = 15 [Expected 15]
-ac^2 + 3a + bc^2 + 3b + c^2 + 3 = 168 [Expected 78]
-floor(a^2, b^2) = 2 [Expected 0]
-ceil(a^2, b^2) = 3 [Expected 1]
+ac^2 + 3a + bc^2 + 3b + c^2 + 3 = 168 [Expected 168]
+floor(a^2, b^2) = 2 [Expected 2]
+ceil(a^2, b^2) = 3 [Expected 3]
 min(ab + 12, ab + a) = 9 [Expected 9]
 max(ab + 12, ab + a) = 18 [Expected 18]
 max(floor(a^2, b) - 2, ceil(c, b) + 1) = 4 [Expected 4]
