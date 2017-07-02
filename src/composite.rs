@@ -1,4 +1,5 @@
 use std::cmp::{Ord, Ordering};
+use std::rc::Rc;
 use std::collections::{HashMap, HashSet};
 
 use traits::*;
@@ -7,23 +8,29 @@ use polynomial::Polynomial;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serialize", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "repr_c", repr(C))]
-/// A composite expression (tagged union) of a variable or an irreducible function (floor, ceil, max, min).
+/// A composite expression (tagged union) of a variable or an irreducible function
+/// (floor, ceil, max, min).
 pub enum Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+    where I: Id,
+          C: Coefficient,
+          P: Power {
     Variable(I),
-    Floor(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
-    Ceil(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
-    Min(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
-    Max(::std::rc::Rc<Polynomial<I, C, P>>, ::std::rc::Rc<Polynomial<I, C, P>>),
+    Floor(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Ceil(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Min(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
+    Max(Rc<Polynomial<I, C, P>>, Rc<Polynomial<I, C, P>>),
 }
 
 impl<I, C, P> Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+    where I: Id,
+          C: Coefficient,
+          P: Power {
     /// Evaluates the `Composite` given the provided mapping of identifiers to value assignments.
     pub fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)> {
         match *self {
             Composite::Variable(ref x) => {
-                values.get(x)
+                values
+                    .get(x)
                     .cloned()
                     .ok_or((x.clone(), format!("Value not provided for {}.", x)))
             }
@@ -109,7 +116,9 @@ impl<I, C, P> Composite<I, C, P>
 
 
 impl<I, C, P> ::std::fmt::Display for Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+    where I: Id,
+          C: Coefficient,
+          P: Power {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         match *self {
             Composite::Variable(ref id) => write!(f, "{}", id),
@@ -122,22 +131,25 @@ impl<I, C, P> ::std::fmt::Display for Composite<I, C, P>
 }
 
 
-
 impl<I, C, P> PartialOrd for Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+    where I: Id,
+          C: Coefficient,
+          P: Power {
     fn partial_cmp(&self, other: &Composite<I, C, P>) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl<I, C, P> Ord for Composite<I, C, P>
-    where I: Id, C: Coefficient, P: Power {
+    where I: Id,
+          C: Coefficient,
+          P: Power {
     fn cmp(&self, other: &Composite<I, C, P>) -> Ordering {
         match *self {
             Composite::Variable(ref id) => {
                 match *other {
                     Composite::Variable(ref o_id) => Ord::cmp(o_id, id),
-                    _ => Ordering::Greater
+                    _ => Ordering::Greater,
                 }
             }
             Composite::Max(ref x, ref y) => {
@@ -149,7 +161,7 @@ impl<I, C, P> Ord for Composite<I, C, P>
                             v => v,
                         }
                     }
-                    _ => Ordering::Greater
+                    _ => Ordering::Greater,
                 }
             }
             Composite::Min(ref x, ref y) => {
@@ -162,7 +174,7 @@ impl<I, C, P> Ord for Composite<I, C, P>
                             v => v,
                         }
                     }
-                    _ => Ordering::Greater
+                    _ => Ordering::Greater,
                 }
             }
             Composite::Ceil(ref x, ref y) => {
@@ -174,7 +186,7 @@ impl<I, C, P> Ord for Composite<I, C, P>
                         }
                     }
                     Composite::Floor(_, _) => Ordering::Greater,
-                    _ => Ordering::Less
+                    _ => Ordering::Less,
                 }
             }
             Composite::Floor(ref x, ref y) => {
@@ -185,7 +197,7 @@ impl<I, C, P> Ord for Composite<I, C, P>
                             v => v,
                         }
                     }
-                    _ => Ordering::Greater
+                    _ => Ordering::Greater,
                 }
             }
         }
