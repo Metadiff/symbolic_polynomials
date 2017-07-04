@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Composite` enum in crate `symbolic_polynomials`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Composite">
+
+    <title>symbolic_polynomials::Composite - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc enum">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Enum Composite</p><div class="block items"><ul><li><a href="#variants">Variants</a></li><li><a href="#methods">Methods</a></li><li><a href="#implementations">Trait Implementations</a></li></ul></div><p class='location'><a href='index.html'>symbolic_polynomials</a></p><script>window.sidebarCurrent = {name: 'Composite', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Enum <a href='index.html'>symbolic_polynomials</a>::<wbr><a class="enum" href=''>Composite</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#13-22' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Composite&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span> {
+    Variable(I),
+    Floor(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;),
+    Ceil(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;),
+    Min(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;),
+    Max(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;),
+}</pre><div class='docblock'><p>A composite expression (tagged union) of a variable or an irreducible function
+(floor, ceil, max, min).</p>
+</div><h2 id='variants' class='variants'>Variants</h2>
+<span id='variant.Variable' class='variant'><span id='Variable.v' class='invisible'><code>Variable(I)</code></span></span><span id='variant.Floor' class='variant'><span id='Floor.v' class='invisible'><code>Floor(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;)</code></span></span><span id='variant.Ceil' class='variant'><span id='Ceil.v' class='invisible'><code>Ceil(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;)</code></span></span><span id='variant.Min' class='variant'><span id='Min.v' class='invisible'><code>Min(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;)</code></span></span><span id='variant.Max' class='variant'><span id='Max.v' class='invisible'><code>Max(<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;,&nbsp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/rc/struct.Rc.html" title="struct alloc::rc::Rc">Rc</a>&lt;<a class="struct" href="../symbolic_polynomials/struct.Polynomial.html" title="struct symbolic_polynomials::Polynomial">Polynomial</a>&lt;I, C, P&gt;&gt;)</code></span></span><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;I, C, P&gt; <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#24-115' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eval' class="method"><span id='eval.v' class='invisible'><code>fn <a href='#method.eval' class='fnname'>eval</a>(&amp;self, values: &amp;<a class="struct" href="https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html" title="struct std::collections::hash::map::HashMap">HashMap</a>&lt;I, C&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;C, <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">(</a>I, <a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a><a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.tuple.html">)</a>&gt;</code></span></h4>
+<div class='docblock'><p>Evaluates the <code>Composite</code> given the provided mapping of identifiers to value assignments.</p>
+</div><h4 id='method.to_code' class="method"><span id='to_code.v' class='invisible'><code>fn <a href='#method.to_code' class='fnname'>to_code</a>&lt;F&gt;(&amp;self, format: &amp;F) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="https://doc.rust-lang.org/nightly/core/ops/trait.Fn.html" title="trait core::ops::Fn">Fn</a>(I) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/collections/string/struct.String.html" title="struct collections::string::String">String</a>,&nbsp;</span></code></span></h4>
+<div class='docblock'><p>Returns a code equivalent string representation of the <code>Composite</code>.
+The <code>format</code> specifies a function how to render the identifiers.</p>
+</div><h4 id='method.unique_identifiers' class="method"><span id='unique_identifiers.v' class='invisible'><code>fn <a href='#method.unique_identifiers' class='fnname'>unique_identifiers</a>(&amp;self, unique: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/std/collections/hash/set/struct.HashSet.html" title="struct std::collections::hash::set::HashSet">HashSet</a>&lt;I&gt;)</code></span></h4>
+<div class='docblock'><p>Fills into the <code>HashSet</code> all of the identifiers used in this <code>Composite</code>.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>, C:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>, P:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#8' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class="method"><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt;</code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class="method"><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a>, C:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a>, P:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#8' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class="method"><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a>, C:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a>, P:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html" title="trait core::cmp::PartialEq">PartialEq</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#8' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eq' class="method"><span id='eq.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt;) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>This method tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq">Read more</a></p>
+</div><h4 id='method.ne' class="method"><span id='ne.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt;) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span></h4>
+<div class='docblock'><p>This method tests for <code>!=</code>.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;I:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a>, C:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a>, P:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a>&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html" title="trait core::cmp::Eq">Eq</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#8' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'></div><h3 class='impl'><span class='in-band'><code>impl&lt;I, C, P&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#118-131' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt-1' class="method"><span id='fmt.v-1' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/core/fmt/type.Result.html" title="type core::fmt::Result">Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#tymethod.fmt">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;I, C, P&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html" title="trait core::cmp::PartialOrd">PartialOrd</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#134-141' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.partial_cmp' class="method"><span id='partial_cmp.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#tymethod.partial_cmp' class='fnname'>partial_cmp</a>(&amp;self, other: &amp;<a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="https://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a>&gt;</code></span></h4>
+<div class='docblock'><p>This method returns an ordering between <code>self</code> and <code>other</code> values if one exists. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#tymethod.partial_cmp">Read more</a></p>
+</div><h4 id='method.lt' class="method"><span id='lt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.lt' class='fnname'>lt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>This method tests less than (for <code>self</code> and <code>other</code>) and is used by the <code>&lt;</code> operator. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.lt">Read more</a></p>
+</div><h4 id='method.le' class="method"><span id='le.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.le' class='fnname'>le</a>(&amp;self, other: &amp;Rhs) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>This method tests less than or equal to (for <code>self</code> and <code>other</code>) and is used by the <code>&lt;=</code> operator. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.le">Read more</a></p>
+</div><h4 id='method.gt' class="method"><span id='gt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.gt' class='fnname'>gt</a>(&amp;self, other: &amp;Rhs) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>This method tests greater than (for <code>self</code> and <code>other</code>) and is used by the <code>&gt;</code> operator. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.gt">Read more</a></p>
+</div><h4 id='method.ge' class="method"><span id='ge.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.ge' class='fnname'>ge</a>(&amp;self, other: &amp;Rhs) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>This method tests greater than or equal to (for <code>self</code> and <code>other</code>) and is used by the <code>&gt;=</code> operator. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialOrd.html#method.ge">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;I, C, P&gt; <a class="trait" href="https://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html" title="trait core::cmp::Ord">Ord</a> for <a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt; <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../symbolic_polynomials/trait.Id.html" title="trait symbolic_polynomials::Id">Id</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../symbolic_polynomials/trait.Coefficient.html" title="trait symbolic_polynomials::Coefficient">Coefficient</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;P: <a class="trait" href="../symbolic_polynomials/trait.Power.html" title="trait symbolic_polynomials::Power">Power</a>,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../src/symbolic_polynomials/composite.rs.html#143-205' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.cmp' class="method"><span id='cmp.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html#tymethod.cmp' class='fnname'>cmp</a>(&amp;self, other: &amp;<a class="enum" href="../symbolic_polynomials/enum.Composite.html" title="enum symbolic_polynomials::Composite">Composite</a>&lt;I, C, P&gt;) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a></code></span></h4>
+<div class='docblock'><p>This method returns an <code>Ordering</code> between <code>self</code> and <code>other</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.Ord.html#tymethod.cmp">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "symbolic_polynomials";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    <script defer src="../search-index.js"></script>
+</body>
+</html>
