@@ -1,7 +1,8 @@
-use std::ops::{AddAssign, SubAssign, MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
+use std::ops::{MulAssign, Mul, DivAssign, Div, RemAssign, Rem, AddAssign, Add, SubAssign, Sub, Neg};
 use std::cmp::{Ord, Ordering};
 use std::convert::AsRef;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
+use num::traits::NumAssignOps;
 
 use traits::*;
 use monomial::Monomial;
@@ -38,15 +39,6 @@ impl<I, C, P> Polynomial<I, C, P>
             1 => self.monomials[0].is_constant(),
             _ => false,
         }
-    }
-
-    /// Evaluates the `Polynomial` given the provided mapping of identifiers to value assignments.
-    pub fn eval(&self, values: &::std::collections::HashMap<I, C>) -> Result<C, (I, String)> {
-        let mut value = C::zero();
-        for m in &self.monomials {
-            value += m.eval(values)?;
-        }
-        Ok(value)
     }
 
     /// Returns a code equivalent string representation of the `Polynomial`.
@@ -106,6 +98,19 @@ impl<I, C, P> Polynomial<I, C, P>
         for m in &self.monomials {
             m.unique_identifiers(unique);
         }
+    }
+}
+
+impl<I, C, P> Evaluable<I, C> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)> {
+        let mut value = C::zero();
+        for m in &self.monomials {
+            value += m.eval(values)?;
+        }
+        Ok(value)
     }
 }
 
@@ -265,6 +270,42 @@ impl<I, C, P> Ord for Polynomial<I, C, P>
     }
 }
 
+impl<I, C, P> ::num::Bounded for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn min_value() -> Self {
+        Self::from(Monomial::min_value())
+    }
+
+    fn max_value() -> Self {
+        Self::from(Monomial::max_value())
+    }
+}
+
+impl<I, C, P> ::num::Zero for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn zero() -> Self {
+        Polynomial{monomials: vec![]}
+    }
+
+    fn is_zero(&self) -> bool {
+        self.monomials.is_empty()
+    }
+}
+
+impl<I, C, P> ::num::One for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+
+    fn one() -> Self {
+        Polynomial{monomials: vec![Monomial::one()]}
+    }
+}
+
 impl<I, C, P> MulAssign<C> for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
@@ -306,6 +347,15 @@ impl<'a, I, C, P> MulAssign<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
         for m in &mut self.monomials {
             *m *= rhs;
         }
+    }
+}
+
+impl<I, C, P> MulAssign<Monomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn mul_assign(&mut self, rhs: Monomial<I, C, P>) {
+        self.mul_assign(&rhs)
     }
 }
 
@@ -417,25 +467,6 @@ impl<I, C, P> Mul<Polynomial<I, C, P>> for Polynomial<I, C, P>
     }
 }
 
-// impl<I, C, P> CheckedDiv<C> for Polynomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    type Output = Polynomial<I, C, P>;
-//    fn checked_div(&self, rhs: C) -> Option<Self::Output> {
-//        let result = Polynomial {
-//            monomials: self.monomials
-//                .iter()
-//                .cloned()
-//                .filter_map(|ref m| m.checked_div(rhs.clone()))
-//                .collect(),
-//        };
-//        if result.monomials.len() != self.monomials.len() {
-//            None
-//        } else {
-//            Some(result)
-//        }
-//    }
-//
-
 impl<'a, I, C, P> Div<C> for &'a Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
@@ -467,25 +498,6 @@ impl<I, C, P> DivAssign<C> for Polynomial<I, C, P>
         self.monomials = ((self as &Polynomial<I, C, P>) / rhs).monomials;
     }
 }
-
-// impl<'a, I, C, P> CheckedDiv<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    type Output = Polynomial<I, C, P>;
-//    fn checked_div(&self, rhs: &'a Monomial<I, C, P>) -> Option<Self::Output> {
-//        let result = Polynomial {
-//            monomials: self.monomials
-//                .iter()
-//                .cloned()
-//                .filter_map(|ref m| m.checked_div(rhs))
-//                .collect(),
-//        };
-//        if result.monomials.len() != self.monomials.len() {
-//            None
-//        } else {
-//            Some(result)
-//        }
-//    }
-//
 
 impl<'a, 'b, I, C, P> Div<&'b Monomial<I, C, P>> for &'a Polynomial<I, C, P>
     where I: Id,
@@ -549,14 +561,6 @@ impl<I, C, P> DivAssign<Monomial<I, C, P>> for Polynomial<I, C, P>
     }
 }
 
-// impl<'a, I, C, P> CheckedDiv<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    type Output = Polynomial<I, C, P>;
-// impl<I, C, P> Polynomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//
-//
-
 impl<'a, 'b, I, C, P> Div<&'b Polynomial<I, C, P>> for &'a Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
@@ -618,23 +622,150 @@ impl<I, C, P> DivAssign<Polynomial<I, C, P>> for Polynomial<I, C, P>
     }
 }
 
-impl<'a, I, C, P> Neg for &'a Polynomial<I, C, P>
+
+
+impl<'a, I, C, P> Rem<C> for &'a Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
     type Output = Polynomial<I, C, P>;
-    fn neg(self) -> Self::Output {
-        Polynomial { monomials: self.monomials.iter().cloned().map(|ref x| -x).collect() }
+    fn rem(self, rhs: C) -> Self::Output {
+        self.div_rem(&rhs.into()).1
     }
 }
 
-impl<I, C, P> Neg for Polynomial<I, C, P>
+impl<I, C, P> Rem<C> for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
     type Output = Polynomial<I, C, P>;
-    fn neg(self) -> Self::Output {
-        (&self).neg()
+    fn rem(self, rhs: C) -> Self::Output {
+        (&self).rem(rhs)
+    }
+}
+
+impl<I, C, P> RemAssign<C> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn rem_assign(&mut self, rhs: C) {
+        self.monomials = ((self as &Polynomial<I, C, P>) % rhs).monomials;
+    }
+}
+
+impl<'a, 'b, I, C, P> Rem<&'b Monomial<I, C, P>> for &'a Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: &'b Monomial<I, C, P>) -> Self::Output {
+        self.div_rem(&rhs.into()).1
+    }
+}
+
+impl<'b, I, C, P> Rem<&'b Monomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: &'b Monomial<I, C, P>) -> Self::Output {
+        (&self).rem(rhs)
+    }
+}
+
+impl<'a, I, C, P> Rem<Monomial<I, C, P>> for &'a Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: Monomial<I, C, P>) -> Self::Output {
+        self.rem(&rhs)
+    }
+}
+
+impl<I, C, P> Rem<Monomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: Monomial<I, C, P>) -> Self::Output {
+        (&self).rem(&rhs)
+    }
+}
+
+impl<'a, I, C, P> RemAssign<&'a Monomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn rem_assign(&mut self, rhs: &'a Monomial<I, C, P>) {
+        self.monomials = ((self as &Polynomial<I, C, P>) % rhs).monomials;
+    }
+}
+
+impl<I, C, P> RemAssign<Monomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn rem_assign(&mut self, rhs: Monomial<I, C, P>) {
+        self.rem_assign(&rhs)
+    }
+}
+
+impl<'a, 'b, I, C, P> Rem<&'b Polynomial<I, C, P>> for &'a Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: &'b Polynomial<I, C, P>) -> Self::Output {
+        self.div_rem(rhs).1
+    }
+}
+
+impl<'b, I, C, P> Rem<&'b Polynomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: &'b Polynomial<I, C, P>) -> Self::Output {
+        (&self).rem(rhs)
+    }
+}
+
+impl<'a, I, C, P> Rem<Polynomial<I, C, P>> for &'a Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: Polynomial<I, C, P>) -> Self::Output {
+        self.rem(&rhs)
+    }
+}
+
+impl<I, C, P> Rem<Polynomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn rem(self, rhs: Polynomial<I, C, P>) -> Self::Output {
+        (&self).rem(&rhs)
+    }
+}
+
+impl<'a, I, C, P> RemAssign<&'a Polynomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn rem_assign(&mut self, rhs: &'a Polynomial<I, C, P>) {
+        self.monomials = ((self as &Polynomial<I, C, P>) % rhs).monomials;
+    }
+}
+
+impl<I, C, P> RemAssign<Polynomial<I, C, P>> for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn rem_assign(&mut self, rhs: Polynomial<I, C, P>) {
+        self.rem_assign(&rhs)
     }
 }
 
@@ -1045,5 +1176,35 @@ impl<I, C, P> Sub<Polynomial<I, C, P>> for Polynomial<I, C, P>
     type Output = Polynomial<I, C, P>;
     fn sub(self, rhs: Polynomial<I, C, P>) -> Self::Output {
         (&self).sub(&rhs)
+    }
+}
+
+impl<'a, I, C, P> Neg for &'a Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn neg(self) -> Self::Output {
+        Polynomial { monomials: self.monomials.iter().cloned().map(|ref x| -x).collect() }
+    }
+}
+
+impl<I, C, P> Neg for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type Output = Polynomial<I, C, P>;
+    fn neg(self) -> Self::Output {
+        (&self).neg()
+    }
+}
+
+impl<I, C, P> ::num::traits::Num for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    type FromStrRadixErr = String;
+    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        unimplemented!()
     }
 }

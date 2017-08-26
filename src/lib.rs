@@ -111,7 +111,7 @@
 //! ```
 //! The main goal of the library is to provide integer polynomials which to be used
 //! for automatic shape inference when modelling tensor shapes in symbolic mathematical engines
-//! (such as Theano, Tensorflow, MXNet and others).
+//! (such as `Theano`, `Tensorflow`, `MXNet` and others).
 //! A small example of how this can be achieved is shown
 //! [here](https://gist.github.com/botev/bac770e32f7df341ce18562f5333e5e5).
 

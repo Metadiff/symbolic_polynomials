@@ -55,15 +55,6 @@ impl<I, C, P> Monomial<I, C, P>
         self.powers.is_empty()
     }
 
-    /// Evaluates the `Monomial` given the provided mapping of identifiers to value assignments.
-    pub fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)> {
-        let mut value = self.coefficient.clone();
-        for &(ref c, ref pow) in &self.powers {
-            value *= ::num::pow(c.eval(values)?, pow.to_usize().unwrap());
-        }
-        Ok(value)
-    }
-
     /// Returns a code equivalent string representation of the `Monomial`.
     /// The `format` specifies a function how to render the identifiers.
     pub fn to_code<F>(&self, format: &F) -> String
@@ -107,6 +98,19 @@ impl<I, C, P> Monomial<I, C, P>
         for &(ref c, _) in &self.powers {
             c.unique_identifiers(unique);
         }
+    }
+}
+
+impl<I, C, P> Evaluable<I, C> for Monomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)> {
+        let mut value = self.coefficient.clone();
+        for &(ref c, ref pow) in &self.powers {
+            value *= ::num::pow(c.eval(values)?, pow.to_usize().unwrap());
+        }
+        Ok(value)
     }
 }
 
@@ -246,6 +250,32 @@ impl<I, C, P> Ord for Monomial<I, C, P>
     }
 }
 
+impl<I, C, P> ::num::One for Monomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+
+    fn one() -> Self {
+        Monomial{
+            coefficient: C::one(),
+            powers: vec![]
+        }
+    }
+}
+
+impl<I, C, P> ::num::Bounded for Monomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn min_value() -> Self {
+        Self::from(C::min_value())
+    }
+
+    fn max_value() -> Self {
+        Self::from(C::max_value())
+    }
+}
+
 impl<I, C, P> MulAssign<C> for Monomial<I, C, P>
     where I: Id,
           C: Coefficient,
@@ -276,6 +306,7 @@ impl<'a, I, C, P> Mul<C> for Monomial<I, C, P>
         (&self).mul(rhs)
     }
 }
+
 
 impl<'a, I, C, P> MulAssign<&'a Monomial<I, C, P>> for Monomial<I, C, P>
     where I: Id,

@@ -1,5 +1,6 @@
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign, Neg};
 use num::{Integer, CheckedDiv, One, Zero, Unsigned};
+use std::collections::HashMap;
 
 /// A trait specifying all the bounds an `Id` type should meet.
 ///
@@ -50,6 +51,9 @@ pub trait Coefficient
     + One
     + ::num::ToPrimitive
     + ::num::FromPrimitive
+    + ::num::Bounded
+    + ::num::CheckedAdd
+    + ::num::CheckedMul
     + CheckedDiv
     + AddAssign<Self>
     + SubAssign<Self>
@@ -66,6 +70,9 @@ impl<T> Coefficient for T
                  + One
                  + ::num::ToPrimitive
                  + ::num::FromPrimitive
+                 + ::num::Bounded
+                 + ::num::CheckedAdd
+                 + ::num::CheckedMul
                  + CheckedDiv
                  + AddAssign<T>
                  + SubAssign<T>
@@ -75,4 +82,10 @@ impl<T> Coefficient for T
                  + Clone
                  + ::std::fmt::Display
                  + ::std::fmt::Debug {
+}
+
+
+pub trait Evaluable<I, C> {
+    /// Evaluates the given the provided mapping of identifiers to value assignments.
+    fn eval(&self, values: &HashMap<I, C>) -> Result<C, (I, String)>;
 }
