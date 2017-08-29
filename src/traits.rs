@@ -1,5 +1,7 @@
 use std::ops::{AddAssign, MulAssign, SubAssign, DivAssign, Neg};
-use num::{Integer, CheckedDiv, One, Zero, Unsigned};
+use num::{Integer, Unsigned, Bounded, ToPrimitive, FromPrimitive,
+          CheckedMul, CheckedDiv, CheckedAdd, CheckedSub};
+use num::traits::NumAssign;
 use std::collections::HashMap;
 
 /// A trait specifying all the bounds an `Id` type should meet.
@@ -19,11 +21,9 @@ impl<T> Id for T
 /// See the module-level documentation for more.
 pub trait Power
     : Integer
-    + One
-    + Zero
     + Unsigned
-    + ::num::ToPrimitive
-    + ::num::FromPrimitive
+    + ToPrimitive
+    + FromPrimitive
     + Clone
     + Ord
     + ::std::fmt::Display
@@ -32,11 +32,9 @@ pub trait Power
 
 impl<T> Power for T
     where T: Integer
-                 + One
-                 + Zero
                  + Unsigned
-                 + ::num::ToPrimitive
-                 + ::num::FromPrimitive
+                 + ToPrimitive
+                 + FromPrimitive
                  + Clone
                  + Ord
                  + ::std::fmt::Display
@@ -48,18 +46,14 @@ impl<T> Power for T
 /// See the module-level documentation for more.
 pub trait Coefficient
     : Integer
-    + One
-    + ::num::ToPrimitive
-    + ::num::FromPrimitive
-    + ::num::Bounded
-    + ::num::CheckedAdd
-    + ::num::CheckedMul
-    + CheckedDiv
-    + AddAssign<Self>
-    + SubAssign<Self>
-    + MulAssign<Self>
-    + DivAssign<Self>
+    + ToPrimitive
+    + FromPrimitive
+    + Bounded
+    + NumAssign
     + Neg<Output = Self>
+    + CheckedMul
+    + CheckedAdd
+    + CheckedSub
     + Clone
     + ::std::fmt::Display
     + ::std::fmt::Debug {
@@ -67,18 +61,14 @@ pub trait Coefficient
 
 impl<T> Coefficient for T
     where T: Integer
-                 + One
-                 + ::num::ToPrimitive
-                 + ::num::FromPrimitive
-                 + ::num::Bounded
-                 + ::num::CheckedAdd
-                 + ::num::CheckedMul
-                 + CheckedDiv
-                 + AddAssign<T>
-                 + SubAssign<T>
-                 + MulAssign<T>
-                 + DivAssign<T>
+                 + ToPrimitive
+                 + FromPrimitive
+                 + Bounded
+                 + NumAssign
                  + Neg<Output = T>
+                 + CheckedMul
+                 + CheckedAdd
+                 + CheckedSub
                  + Clone
                  + ::std::fmt::Display
                  + ::std::fmt::Debug {

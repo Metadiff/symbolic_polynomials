@@ -1,7 +1,9 @@
-use std::ops::{MulAssign, DivAssign, Add, Neg, Sub, Mul, Div};
+use std::ops::{MulAssign, Mul, DivAssign, Div, Add, Neg, Sub,};
 use std::collections::{HashMap, HashSet};
 use std::cmp::{Ord, Ordering};
 use std::convert::AsRef;
+use num::{CheckedMul, CheckedDiv, CheckedAdd, CheckedSub};
+use num::traits::{One, Bounded};
 
 use traits::*;
 use polynomial::Polynomial;
@@ -250,7 +252,7 @@ impl<I, C, P> Ord for Monomial<I, C, P>
     }
 }
 
-impl<I, C, P> ::num::One for Monomial<I, C, P>
+impl<I, C, P> One for Monomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
@@ -263,7 +265,7 @@ impl<I, C, P> ::num::One for Monomial<I, C, P>
     }
 }
 
-impl<I, C, P> ::num::Bounded for Monomial<I, C, P>
+impl<I, C, P> Bounded for Monomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
@@ -434,22 +436,20 @@ impl<I, C, P> Mul<Polynomial<I, C, P>> for Monomial<I, C, P>
     }
 }
 
-
-// impl<I, C, P> CheckedDiv<C> for Monomial<I, C, P>
-//    where I: Id, C: Coefficient, P: Power {
-//    type Output = Monomial<I, C, P>;
-//    fn checked_div(&self, other: C) -> Option<Self::Output> {
-//        let (d, rem) = self.coefficient.div_rem(&other);
-//        if rem == C::zero() {
-//            Some(Monomial {
-//                coefficient: d,
-//                powers: self.powers.clone(),
-//            })
-//        } else {
-//            None
-//        }
-//    }
-//
+impl<'a, I, C, P> CheckedMul for Monomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+    fn checked_mul(&self, rhs: &Self) -> Option<Self> {
+        if self.coefficient.checked_mul(&rhs.coefficient).is_some() {
+            let mut result = self.clone();
+            result *= rhs;
+            Some(result)
+        } else {
+            None
+        }
+    }
+}
 
 impl<'a, I, C, P> Div<C> for &'a Monomial<I, C, P>
     where I: Id,

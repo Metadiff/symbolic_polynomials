@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::convert::AsRef;
 use std::rc::Rc;
 use std::borrow::Borrow;
-use num::{Zero, One, Bounded};
+use num::{Zero, One, Bounded, CheckedMul, CheckedAdd, CheckedSub};
 
 /// Returns a polynomial representing 1 * x^1 + 0,
 /// where 'x' is a variable uniquely identifiable by the provided `id`.
@@ -354,8 +354,8 @@ pub fn deduce_values<I, C, P, T>(original_values: &[(T, C)]) -> Result<HashMap<I
                     false
                 }
             } else if (p.monomials.len() == 1 ||
-                       (p.monomials.len() == 2 && p.monomials[1].is_constant())) &&
-                      p.monomials[0].powers.len() == 1 {
+                (p.monomials.len() == 2 && p.monomials[1].is_constant())) &&
+                p.monomials[0].powers.len() == 1 {
                 if let Composite::Variable(ref id, _, _) = p.monomials[0].powers[0].0 {
                     // The polynomial is in the form a * x^n + b, so we can deduce value of 'x'
                     let b = p.monomials
@@ -387,13 +387,6 @@ pub fn deduce_values<I, C, P, T>(original_values: &[(T, C)]) -> Result<HashMap<I
                 false
             }
         };
-        //        if to_remove {
-        //            implicit_values.remove(i);
-        //            indexes.remove(i);
-        //            if implicit_values.is_empty() {
-        //                return Ok(values);
-        //            }
-        //        }
         if to_reduce {
             for &mut (ref mut p, _) in &mut implicit_values {
                 *p = reduce(&p, &values);
@@ -411,63 +404,56 @@ pub fn deduce_values<I, C, P, T>(original_values: &[(T, C)]) -> Result<HashMap<I
 
 }
 
-fn calculate_bounds<I, C, P, T>(value :T) -> (Polynomial<I, C, P>, Polynomial<I, C, P>)
+fn calculate_bounds<I, C, P, T>(expr :T, primitive_bounds: &HashMap<I, (C, C)>) -> (Polynomial<I, C, P>, Polynomial<I, C, P>)
     where I: Id,
           C: Coefficient,
           P: Power,
           T: AsRef<Polynomial<I, C, P>> {
-    let value = value.as_ref();
+    let expr = expr.as_ref();
     let mut lower_bound = Polynomial::<I,C,P>::zero();
     let mut upper_bound = Polynomial::<I, C, P>::zero();
-    for m in &value.monomials {
+    let two = P::one() + P::one();
+    for m in &expr.monomials {
         let mut m_lower = Polynomial::<I, C, P>::one();
         let mut m_upper = Polynomial::<I, C, P>::one();
         for &(ref c, ref p) in m.powers.iter() {
-            match *c {
-                Composite::Variable(_, None, None) => {
-                    m_lower = Polynomial::<I, C, P>::min_value();
-                    m_upper = Polynomial::<I, C, P>::max_value();
-                    break;
-                },
-                Composite::Variable(_, Some(ref lb), None) => {
-//                    let (lb, _) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(lb.borrow());
-//                    m_lower = m_lower.checked_mul(&lb).unwrap_or(C::min_value());
-//                    m_upper = C::max_value();
-                },
-                Composite::Variable(_, None, Some(ref ub)) => {
-//                    let (_, ub) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(ub.borrow());
-//                    m_lower = C::min_value();
-//                    m_upper = m_upper.checked_mul(&ub).unwrap_or(C::max_value());
-                },
-                Composite::Variable(_, Some(ref lb), Some(ref ub)) => {
-//                    let (lb, _) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(lb.borrow());
-//                    let (_, ub) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(ub.borrow());
-//                    m_lower = m_lower.checked_mul(&lb).unwrap_or(C::min_value());
-//                    m_upper = m_upper.checked_mul(&ub).unwrap_or(C::max_value());
-                },
-                Composite::Min(ref x, ref y) => {
-//                    let (lbx, ubx) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(x.borrow());
-//                    let (lby, uby) = calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(y.borrow());
-
-                },
+            let (lb, ub) = match *c {
+                Composite::Variable(ref i, ref lb, ref ub) => {
+                    if let Some(&(ref lb, ref ub)) = primitive_bounds.get(i) {
+                        (Polynomial::<I, C, P>::from(lb.clone()),
+                         Polynomial::<I, C, P>::from(ub.clone()))
+                    } else {
+                        (lb.as_ref().map(|x| calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(x.borrow(), primitive_bounds))
+                            .map(|(lb, ub)| lb)
+                            .unwrap_or(Polynomial::<I, C, P>::min_value()),
+                        ub.as_ref().map(|x| calculate_bounds::<I, C, P, &Polynomial<I, C, P>>(x.borrow(), primitive_bounds))
+                            .map(|(lb, ub)| ub)
+                            .unwrap_or(Polynomial::<I, C, P>::max_value()))
+                    }
+                }
                 _ => {
+                    unimplemented!()
+                }
+            };
+            if p.clone().rem(two.clone()).is_zero() {
+                // We define absolute value as max(x, -x)
 
+                unimplemented!()
+            } else {
+                let mut i = P::zero();
+                while i < *p {
+                    m_lower = m_lower.checked_mul(&lb)
+                        .unwrap_or(Polynomial::<I, C, P>::min_value());
+                    m_upper = m_upper.checked_mul(&ub)
+                        .unwrap_or(Polynomial::<I, C, P>::max_value());
+                    i = i + P::one();
                 }
             }
         }
-        // TODO raise to power
-//        if m.coefficient < C::zero() {
-//            m_lower = m_lower.checked_mul(&m.coefficient).unwrap_or(C::max_value());
-//            m_upper = m_upper.checked_mul(&m.coefficient).unwrap_or(C::min_value());
-//            let temp = m_lower;
-//            m_lower = m_upper;
-//            m_upper = temp;
-//        } else {
-//            m_lower = m_lower.checked_mul(&m.coefficient).unwrap_or(C::min_value());
-//            m_upper = m_upper.checked_mul(&m.coefficient).unwrap_or(C::max_value());
-//        }
-//        lower_bound = lower_bound.checked_add(&m_lower).unwrap_or(C::min_value());
-//        upper_bound = upper_bound.checked_add(&m_upper).unwrap_or(C::max_value());
+        lower_bound = lower_bound.checked_sub(&m_lower)
+            .unwrap_or(Polynomial::<I, C, P>::min_value());
+        upper_bound = upper_bound.checked_add(&m_upper)
+            .unwrap_or(Polynomial::<I, C, P>::max_value());
     }
     (lower_bound, upper_bound)
 }

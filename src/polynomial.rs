@@ -2,7 +2,7 @@ use std::ops::{MulAssign, Mul, DivAssign, Div, RemAssign, Rem, AddAssign, Add, S
 use std::cmp::{Ord, Ordering};
 use std::convert::AsRef;
 use std::collections::{HashSet, HashMap};
-use num::traits::NumAssignOps;
+use num::traits::{Zero, One, Bounded, CheckedMul, CheckedDiv, CheckedAdd, CheckedSub};
 
 use traits::*;
 use monomial::Monomial;
@@ -270,7 +270,7 @@ impl<I, C, P> Ord for Polynomial<I, C, P>
     }
 }
 
-impl<I, C, P> ::num::Bounded for Polynomial<I, C, P>
+impl<I, C, P> Bounded for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
@@ -283,7 +283,7 @@ impl<I, C, P> ::num::Bounded for Polynomial<I, C, P>
     }
 }
 
-impl<I, C, P> ::num::Zero for Polynomial<I, C, P>
+impl<I, C, P> Zero for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
@@ -296,7 +296,7 @@ impl<I, C, P> ::num::Zero for Polynomial<I, C, P>
     }
 }
 
-impl<I, C, P> ::num::One for Polynomial<I, C, P>
+impl<I, C, P> One for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
           P: Power {
@@ -464,6 +464,30 @@ impl<I, C, P> Mul<Polynomial<I, C, P>> for Polynomial<I, C, P>
     type Output = Polynomial<I, C, P>;
     fn mul(self, rhs: Polynomial<I, C, P>) -> Self::Output {
         (&self).mul(&rhs)
+    }
+}
+
+impl<'a, I, C, P> CheckedMul for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+
+    fn checked_mul(&self, rhs: &Self) -> Option<Self> {
+        let mut result = Polynomial { monomials: Vec::new() };
+        for m in &self.monomials {
+            for m2 in &rhs.monomials {
+                if let Some(value) = m.checked_mul(m2) {
+                    if let Some(value) = result.checked_add(&value.into()) {
+                        result = value;
+                    } else {
+                        return None
+                    }
+                } else {
+                    return None
+                }
+            }
+        }
+        Some(result)
     }
 }
 
@@ -974,6 +998,45 @@ impl<I, C, P> Add<Polynomial<I, C, P>> for Polynomial<I, C, P>
     }
 }
 
+impl<'a, I, C, P> CheckedAdd for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+
+    fn checked_add(&self, rhs: &Self) -> Option<Self> {
+        let mut result = self.clone();
+        let mut i1 = 0;
+        let mut i2 = 0;
+        while i1 < result.monomials.len() && i2 < rhs.monomials.len() {
+            if result.monomials[i1].up_to_coefficient(&rhs.monomials[i2]) {
+                if let Some(value) = result.monomials[i1].coefficient
+                    .checked_add(&rhs.monomials[i2].coefficient) {
+                    result.monomials[i1].coefficient = value;
+                } else {
+                    return None
+                }
+                if result.monomials[i1].coefficient == C::zero() {
+                    result.monomials.remove(i1);
+                } else {
+                    i1 += 1;
+                }
+                i2 += 1;
+            } else if result.monomials[i1] > rhs.monomials[i2] {
+                i1 += 1;
+            } else {
+                result.monomials.insert(i1, rhs.monomials[i2].clone());
+                i1 += 1;
+                i2 += 1;
+            }
+        }
+        while i2 < rhs.monomials.len() {
+            result.monomials.push(rhs.monomials[i2].clone());
+            i2 += 1;
+        }
+        Some(result)
+    }
+}
+
 impl<I, C, P> SubAssign<C> for Polynomial<I, C, P>
     where I: Id,
           C: Coefficient,
@@ -1176,6 +1239,45 @@ impl<I, C, P> Sub<Polynomial<I, C, P>> for Polynomial<I, C, P>
     type Output = Polynomial<I, C, P>;
     fn sub(self, rhs: Polynomial<I, C, P>) -> Self::Output {
         (&self).sub(&rhs)
+    }
+}
+
+impl<'a, I, C, P> CheckedSub for Polynomial<I, C, P>
+    where I: Id,
+          C: Coefficient,
+          P: Power {
+
+    fn checked_sub(&self, rhs: &Self) -> Option<Self> {
+        let mut result = self.clone();
+        let mut i1 = 0;
+        let mut i2 = 0;
+        while i1 < result.monomials.len() && i2 < rhs.monomials.len() {
+            if result.monomials[i1].up_to_coefficient(&rhs.monomials[i2]) {
+                if let Some(value) = result.monomials[i1].coefficient
+                    .checked_sub(&rhs.monomials[i2].coefficient) {
+                    result.monomials[i1].coefficient = value;
+                } else {
+                    return None
+                }
+                if result.monomials[i1].coefficient == C::zero() {
+                    result.monomials.remove(i1);
+                } else {
+                    i1 += 1;
+                }
+                i2 += 1;
+            } else if result.monomials[i1] > rhs.monomials[i2] {
+                i1 += 1;
+            } else {
+                result.monomials.insert(i1, rhs.monomials[i2].clone());
+                i1 += 1;
+                i2 += 1;
+            }
+        }
+        while i2 < rhs.monomials.len() {
+            result.monomials.push(rhs.monomials[i2].clone());
+            i2 += 1;
+        }
+        Some(result)
     }
 }
 
