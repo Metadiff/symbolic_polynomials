@@ -87,6 +87,12 @@ pub fn main() {
     let poly9 = max(a * b + 12, a * b + a);
     // max(floor(a^2, b) - 4, ceil(c, b) + 1)
     let poly10 = max(floor(a * a, b) - 2, ceil(c, b) + 1);
+    // (5b + 2)^2
+    let poly11 = &poly1 * &poly1;
+    // floor((5b + 2)^2, 5b + 2) = 5b + 2
+    let poly12 = floor(&poly11, &poly1);
+    // ceil((5b + 2)^2, 5b + 2) = 5b + 2
+    let poly13 = ceil(&poly11, &poly1);
 
     // Polynomial printing
     let print_function = &|x: String| x;
@@ -102,6 +108,9 @@ pub fn main() {
     println!("{} = {}", poly8, poly8.to_code(print_function));
     println!("{} = {}", poly9, poly9.to_code(print_function));
     println!("{} = {}", poly10, poly10.to_code(print_function));
+    println!("(5b + 2)^2 = {}", poly11);
+    println!("floor((5b + 2)^2, 5b + 2) = {}", poly12);
+    println!("ceil((5b + 2)^2, 5b + 2) = {}", poly13);
     println!("{}", (0..50).map(|_| "=").collect::<String>());
 
     // Polynomial evaluation
@@ -120,6 +129,9 @@ pub fn main() {
     println!("{} = {} [Expected 9]", poly8, poly8.eval(values).unwrap());
     println!("{} = {} [Expected 18]", poly9, poly9.eval(values).unwrap());
     println!("{} = {} [Expected 4]", poly10, poly10.eval(values).unwrap());
+    println!("{} = {} [Expected 144]", poly11, poly11.eval(values).unwrap());
+    println!("{} = {} [Expected 12]", poly12, poly12.eval(values).unwrap());
+    println!("{} = {} [Expected 12]", poly13, poly13.eval(values).unwrap());
     println!("{}", (0..50).map(|_| "=").collect::<String>());
 
     // Variable deduction
@@ -154,6 +166,9 @@ ceil(a^2, b^2) = ceil(a * a, b * b)
 min(ab + 12, ab + a) = min(a * b + 12, a * b + a)
 max(ab + 12, ab + a) = max(a * b + 12, a * b + a)
 max(floor(a^2, b) - 2, ceil(c, b) + 1) = max(floor(a * a, b) - 2, ceil(c, b) + 1)
+(5b + 2)^2 = 25b^2 + 20b + 4
+floor((5b + 2)^2, 5b + 2) = 5b + 2
+ceil((5b + 2)^2, 5b + 2) = 5b + 2
 ==================================================
 Evaluating for a = 3, b = 2, c = 5.
 5b + 2 = 12 [Expected 12]
@@ -166,6 +181,9 @@ ceil(a^2, b^2) = 3 [Expected 3]
 min(ab + 12, ab + a) = 9 [Expected 9]
 max(ab + 12, ab + a) = 18 [Expected 18]
 max(floor(a^2, b) - 2, ceil(c, b) + 1) = 4 [Expected 4]
+25b^2 + 20b + 4 = 144 [Expected 144]
+5b + 2 = 12 [Expected 12]
+5b + 2 = 12 [Expected 12]
 ==================================================
 Deduced values:
 a = 5 [Expected 5]
